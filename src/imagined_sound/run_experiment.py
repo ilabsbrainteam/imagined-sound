@@ -1,109 +1,132 @@
 # Author: Daniel McCloy <dan@mccloy.info>
 #
 # License: BSD (3-clause)
+import yaml
+
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
+
 from expyfun import ExperimentController
+from expyfun.stimuli import read_wav, rms
 from expyfun.visual import FixationDot
 
+# set timing parameters
+block_start_delay = 0.4
+max_response_dur = 4.0
+# pre_response_delay = 0.8  # defined differently per block
+inter_trial_interval = 1.2
 
-# set configuration
-fs = 48000.0
-response_dur = 5.0
-ready_dur = 0.4
-response_wait_dur = 0.5
+# random number generator
+rng = np.random.default_rng(seed=8675309)
 
-blocks = dict(
-    one=SimpleNamespace(
-        videos=["test.mpeg", "test.mpeg"], noun="speech", verb="repeating"
-    ),
-    two=SimpleNamespace(
-        videos=["test.mpeg", "test.mpeg"], noun="melody", verb="playing"
-    ),
+# load textual prompts for the participant
+with open("prompts.yaml") as fid:
+    prompts = yaml.safe_load(fid)
+prompts = SimpleNamespace(
+    **{k: " ".join(v.strip().split("\n")) for k, v in prompts.items()}
 )
-
 paktc = " Press any key to continue."
 
+# load stimulus lists
+with open("blocks.yaml") as fid:
+    blocks = yaml.safe_load(fid)
+blocks = SimpleNamespace(**blocks)
+
+# colors
+colors = dict(
+    pink=(187, 85, 102, 255),
+    yellow=(221, 170, 51, 255),
+)
+white = (255, 255, 255, 255)
+color_text = {
+    name: f"{{color {col}}}{name}{{color {white}}}" for name, col in colors.items()
+}
+for col, text in color_text.items():
+    prompts.only_click = prompts.only_click.replace(col, text)
+    prompts.imagine_click_some = prompts.imagine_click_some.replace(col, text)
+    prompts.imagine_click_all = prompts.imagine_click_all.replace(col, text)
+
 with ExperimentController(
-    "MSA",
+    "imagined-sound",
     participant="foo",
     session="999",
+    stim_fs=44100,
+    stim_rms=0.01,
     output_dir="logs",
-    version="1c3e802",
-    audio_controller=dict(TYPE="sound_card", SOUND_CARD_BACKEND="pyglet"),
+    version="dev",
 ) as ec:
     # we'll need this later
     dot = FixationDot(ec)
     radius = dot._circles[0]._radius
 
     # welcome instructions
-    ec.screen_prompt(f"TODO insert welcome-screen instructions here.{paktc}")
+    ec.screen_prompt(prompts.welcome)
 
-    # loop over blocks
-    for block_name, block in blocks.items():
-        # block instructions
-        ec.screen_prompt(
-            f"In this block, listen to the {block.noun}, and when the fixation dot "
-            f"changes to green, imagine you're {block.verb} the {block.noun}. When "
-            f"you're done imagining the {block.noun}, press any key.{paktc}",
+    # first block: only click (no imagining)
+    ec.screen_prompt(prompts.only_click + paktc)
+    ec.screen_prompt("Here we go!", max_wait=block_start_delay, live_keys=[])
+    pre_response_delay = 0.8  # seconds
+
+    for ix, stim_fname in enumerate(blocks.only_click, start=1):
+        # is this a button-press trial or not?
+        expect_press = ix % 3 == 0
+        # load the audio file
+        data, fs = read_wav(Path("stimuli") / "NWF003" / stim_fname)
+        assert fs == 44100, "bad stimulus sampling frequency"
+        rms_data = 0.01 * data / rms(data)
+        ec.load_buffer(rms_data)
+        duration = rms_data.shape[-1] / fs
+        # light gray fixation dot during stimulus (TODO: might be confusing?)
+        dot.set_colors(["0.9", "k"])
+        dot.draw()
+        # start the trial
+        ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=[0, 0])
+        t_stim_start = ec.start_stimulus()  # sends a 1-trigger; "sentence start"
+        ec.wait_secs(duration)
+        ec.stop()
+        ec.stamp_triggers([4, 8], wait_for_last=False)  # 4, 8 = audio over
+        # white fixation dot during prepare-for-response period
+        dot.set_colors(["w", "k"])
+        dot.draw()
+        _ = ec.flip()
+        # larger, colored fixation dot during response period
+        # convert pyglet RGBA (ints in [0 255]) to matplotlib RGBA (floats in [0 1])
+        color = colors["pink"] if expect_press else colors["yellow"]
+        dot_col = tuple(map(lambda x: x / 255, color))
+        dot.set_colors([dot_col, "k"])
+        dot.set_radius(2 * radius, idx=0, units="pix")
+        dot.draw()  # won't actually change until next flip
+        pre_response_jitter = rng.uniform(low=0.0, high=0.4)
+        ec.wait_secs(pre_response_delay + pre_response_jitter)
+        t_response_start = ec.flip()
+        # response period
+        ec.stamp_triggers([8, 4], wait_for_last=False)  # 8, 4 = begin response
+        press_kwargs = dict(max_wait=max_response_dur, relative_to=t_response_start)
+        if expect_press:
+            pressed, t_press = ec.wait_one_press(**press_kwargs)
+            t_response_end = t_press or ec.get_time()
+        else:
+            presses_and_timestamps = ec.wait_for_presses(**press_kwargs)
+            if presses_and_timestamps:
+                pressed, t_press = list(zip(*presses_and_timestamps))
+            else:
+                pressed, t_press = (), ()
+            t_response_end = ec.get_time()
+        ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
+        # restore dot color and radius
+        dot.set_radius(radius, idx=0, units="pix")
+        dot.set_colors(["w", "k"])
+        dot.draw()
+        _ = ec.flip()
+        # logging and end trial
+        msg = (
+            f"stimulus began at {t_stim_start}. "
+            f"Response period began at {t_response_start}, ended at {t_response_end} "
+            f"({t_response_end - t_response_start} s duration). "
+            f"Button press at {t_press or '<NONE>'}"
         )
-        ec.screen_prompt("Here we go!", max_wait=ready_dur, live_keys=[])
-
-        # loop over stimuli
-        for vix, fname in enumerate(block.videos):
-            # load video (TODO if audio, just draw dot)
-            ec.load_video(str(Path(__file__).parent / "stimuli" / fname))
-            ec.video.set_scale("fit")
-            ec.identify_trial(ec_id=f"{block_name}_{vix}", ttl_id=[0, 0])
-            # play video
-            t_start = ec.start_stimulus()  # sends a 1-trigger; "video start"
-            t_zero = ec.video.play(audio=True)
-            while not ec.video.finished:
-                if ec.video.playing:
-                    fliptime = ec.flip()
-                ec.check_force_quit()
-            # log the video playback
-            ec.stamp_triggers([4, 8], wait_for_last=False)  # 4, 8 = video over
-            elapsed = ec.get_time() - t_zero
-            t_diff = elapsed - ec.video.duration
-            speed = "faster" if t_diff < 0 else "slower"
-            ec.write_data_line(
-                f"video {fname} (duration {ec.video.duration}) played in "
-                f"{elapsed} seconds ({t_diff} seconds {speed} than expected)"
-            )
-            # clean up
-            ec.stop()
-            ec.delete_video()
-            # prepare for response
-            dot.draw()
-            ec.flip()
-            ec.wait_secs(response_wait_dur)
-            # change dot color and radius at start of response period
-            dot.set_colors(["g", "k"])
-            dot.set_radius(2 * radius, idx=0, units="pix")
-            dot.draw()
-            # response period
-            r_start = ec.flip()
-            ec.stamp_triggers([8, 4], wait_for_last=False)  # 8, 4 = begin response
-            pressed, t_press = ec.wait_one_press(
-                max_wait=response_dur, relative_to=r_start
-            )
-            r_end = ec.get_time()
-            ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
-            # log the response period
-            extra = "" if pressed is None else f" {pressed} pressed after {t_press}."
-            msg = (
-                f"response period began at {r_start}, ended at {r_end} "
-                f"({r_end - r_start} s duration).{extra}"
-            )
-            ec.write_data_line(extra)
-            # restore dot color and radius
-            dot.set_radius(radius, idx=0, units="pix")
-            dot.set_colors(["w", "k"])
-            dot.draw()
-            ec.trial_ok()
-            ec.wait_secs(0.2)
-            ec.flip()
-        # block end
-        ec.screen_prompt(f"End of block.{paktc}")
+        ec.write_data_line(msg)
+        ec.trial_ok()
+        ec.wait_secs(inter_trial_interval)
