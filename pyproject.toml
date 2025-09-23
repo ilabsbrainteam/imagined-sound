@@ -18,6 +18,7 @@ imagined_sound = { path = ".", editable = true }
 expyfun = { path = "/opt/expyfun", editable = true }
 
 [tool.pixi.tasks]
+experiment = "cd src/imagined_sound/ && python run_experiment.py"
 
 [tool.pixi.dependencies]
 ipython = ">=9.5.0,<10"
