@@ -14,6 +14,7 @@ from expyfun.visual import FixationDot
 # set timing parameters
 block_start_delay = 0.4
 imagine_dur = 3.5
+feedback_dur = 0.2
 # pre_response_delay = 0.8  # defined differently per block
 inter_trial_interval = 1.0
 
@@ -115,18 +116,22 @@ with ExperimentController(
             t_response_start = ec.flip()
             # response period
             ec.stamp_triggers([8, 4], wait_for_last=False)  # 8, 4 = begin response
-            press_kwargs = dict(max_wait=max_response_dur, relative_to=t_response_start)
-            if expect_press:
-                pressed, t_press = ec.wait_one_press(**press_kwargs)
-                t_response_end = t_press or ec.get_time()
-            else:
-                presses_and_timestamps = ec.wait_for_presses(**press_kwargs)
-                if presses_and_timestamps:
-                    pressed, t_press = list(zip(*presses_and_timestamps))
-                else:
-                    pressed, t_press = (), ()
-                t_response_end = ec.get_time()
+            pressed, t_press = ec.wait_one_press(
+                max_wait=max_response_dur, relative_to=t_response_start
+            )
+            t_response_end = t_press or ec.get_time()
             ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
+            # feedback
+            if (expect_press and pressed) or not (expect_press or pressed):
+                feedback = "✔"
+                color = "w"
+            else:
+                feedback = "✘"
+                color = "k"
+            dot.draw()
+            ec.screen_text(feedback, color=color, font_name="DejaVu Sans", wrap=False)
+            _ = ec.flip()
+            ec.wait_secs(feedback_dur)
             # restore dot color and radius
             dot.set_radius(radius, idx=0, units="pix")
             dot.set_colors(["w", "k"])
