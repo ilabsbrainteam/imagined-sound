@@ -246,7 +246,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e5/48/1549795ba7742c948d2ad169c1c8cdbae65bc450d6cd753d124b17c8cd32/certifi-2025.8.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/98/df/0a1755e750013a2081e863e7cd37e0cdd02664372c754e5560099eb7aa44/cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/7e/95/42aa2156235cbc8fa61208aded06ef46111c4d3f0de233107b3f38631803/charset_normalizer-3.4.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-      - pypi: git+https://github.com/drammock/expyfun.git?rev=modernize#20a40ae1cc1dadb0382895686b840dc967625dc8
+      - pypi: git+https://github.com/LABSN/expyfun.git?rev=2570c72#2570c7218535a249163ffa28dd0cba20099d0daf
       - pypi: https://files.pythonhosted.org/packages/a0/61/5c78b91c3143ed5c14207f463aecfc8f9dbb5092fb2869baf37c273b2705/gitdb-4.0.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/61/d4b89fec821f72385526e1b9d9a3a0385dda4a72b206d28049e2c7cd39b8/gitpython-3.1.45-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/81/3c/e7260dcdbdb166a8e85b72929066f33a2892930eb81bd9080682f97c4855/h5io-0.2.5-py3-none-any.whl
@@ -572,9 +572,9 @@ packages:
   - pkg:pypi/executing?source=compressed-mapping
   size: 30753
   timestamp: 1756729456476
-- pypi: git+https://github.com/drammock/expyfun.git?rev=modernize#20a40ae1cc1dadb0382895686b840dc967625dc8
+- pypi: git+https://github.com/LABSN/expyfun.git?rev=2570c72#2570c7218535a249163ffa28dd0cba20099d0daf
   name: expyfun
-  version: 0.1.0.dev1434+g20a40ae1c
+  version: 2.1.0.dev1007+g2570c7218
   requires_dist:
   - decorator
   - h5io
@@ -941,9 +941,9 @@ packages:
 - pypi: ./
   name: imagined-sound
   version: 0.1.0
-  sha256: c8c45452d3779bf6944704845119ac6b53d772634b9e686d08e118c71838cf7c
+  sha256: e031ad154716cb57b0d606ea2b27ade9050bdc913a4c257592b3ef7e3366d541
   requires_dist:
-  - expyfun[all] @ git+https://github.com/drammock/expyfun.git@modernize
+  - expyfun[all] @ git+https://github.com/LABSN/expyfun.git@2570c72
   requires_python: '>=3.11'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/intel-gmmlib-22.8.2-hb700be7_0.conda
