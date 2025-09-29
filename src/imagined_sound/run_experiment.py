@@ -58,6 +58,7 @@ with ExperimentController(
     check_rms=None,
     output_dir="logs",
     version="dev",
+    full_screen=False, screen_num=1, window_size=[1200,900]
 ) as ec:
     # we'll need this later
     dot = FixationDot(ec)

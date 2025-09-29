@@ -1,0 +1,378 @@
+2025-09-29 13:51:25,544 - INFO    - Expyfun: Using version 2.0.0.dev0 (requested dev)
+2025-09-29 13:51:25,548 - INFO    - Expyfun: Setting up TDT
+2025-09-29 13:51:25,900 - INFO    - Expyfun: RPcoX connection established
+2025-09-29 13:51:26,298 - INFO    - Expyfun: Circuit loaded to RZ6 via GB:
+C:\Users\stim\MEGLab_Code\GitHub_Packages\expytest_packages\imagined-sound\.pixi\envs\default\Lib\site-packages\expyfun\data\expCircuitF32_RZ6.rcx
+2025-09-29 13:51:26,298 - INFO    - Expyfun: TDT circuit running
+2025-09-29 13:51:26,550 - INFO    - Expyfun: Setting TDT delay to 44
+2025-09-29 13:51:26,550 - INFO    - Expyfun: Setting TDT trigger delay to 3
+2025-09-29 13:51:26,649 - WARNING - Expyfun: Mismatch between reported stim sample rate (44100) and device sample rate (24414.0625). Experiment Controller will resample for you, but this takes a non-trivial amount of processing time and may compromise your experimental timing and/or cause artifacts.
+2025-09-29 13:51:26,649 - INFO    - Expyfun: Setting up screen
+2025-09-29 13:51:27,281 - EXP     - Expyfun: Set screen visibility True
+2025-09-29 13:51:27,317 - INFO    - Initialized [1200  900] window on screen Win32Screen(x=1920, y=0, width=3840, height=2160) with DPI 52.44
+2025-09-29 13:51:27,317 - INFO    - Expyfun: Initializing tdt triggering mode
+2025-09-29 13:51:27,320 - INFO    - Expyfun: Initialization complete
+2025-09-29 13:51:27,320 - EXP     - Expyfun: Participant: foo
+2025-09-29 13:51:27,320 - EXP     - Expyfun: Session: 999
+2025-09-29 13:51:53,615 - INFO    - Read WAV file with 1 channel and 63870 samples (format int16)
+2025-09-29 13:51:53,617 - WARNING - Expyfun: Resampling 1.45 seconds of audio
+2025-09-29 13:51:54,227 - EXP     - Expyfun: Loading 70718 samples to buffer
+2025-09-29 13:51:54,377 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_01-07.wav
+2025-09-29 13:51:54,378 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:51:54,378 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:51:54,420 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:51:55,880 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:51:55,880 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:51:57,498 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:51:58,919 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:51:58,964 - EXP     - Expyfun: Trial OK
+2025-09-29 13:51:59,967 - INFO    - Read WAV file with 1 channel and 73355 samples (format int16)
+2025-09-29 13:51:59,970 - WARNING - Expyfun: Resampling 1.66 seconds of audio
+2025-09-29 13:52:00,008 - EXP     - Expyfun: Loading 81220 samples to buffer
+2025-09-29 13:52:00,184 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_02-01.wav
+2025-09-29 13:52:00,185 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:00,185 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:00,226 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:01,895 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:01,895 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:03,848 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:05,268 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:05,314 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:06,317 - INFO    - Read WAV file with 1 channel and 70951 samples (format int16)
+2025-09-29 13:52:06,319 - WARNING - Expyfun: Resampling 1.61 seconds of audio
+2025-09-29 13:52:06,360 - EXP     - Expyfun: Loading 78558 samples to buffer
+2025-09-29 13:52:06,531 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_02-06.wav
+2025-09-29 13:52:06,531 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:06,531 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:06,573 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:08,190 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:08,190 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:10,048 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:10,484 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:10,531 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:11,535 - INFO    - Read WAV file with 1 channel and 91826 samples (format int16)
+2025-09-29 13:52:11,537 - WARNING - Expyfun: Resampling 2.08 seconds of audio
+2025-09-29 13:52:11,580 - EXP     - Expyfun: Loading 101672 samples to buffer
+2025-09-29 13:52:11,799 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_03-02.wav
+2025-09-29 13:52:11,799 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:11,800 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:11,840 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:13,930 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:13,930 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:16,331 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:17,752 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:17,797 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:18,799 - INFO    - Read WAV file with 1 channel and 64213 samples (format int16)
+2025-09-29 13:52:18,801 - WARNING - Expyfun: Resampling 1.46 seconds of audio
+2025-09-29 13:52:18,847 - EXP     - Expyfun: Loading 71098 samples to buffer
+2025-09-29 13:52:19,002 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_03-10.wav
+2025-09-29 13:52:19,003 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:19,003 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:19,045 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:20,521 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:20,521 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:22,064 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:23,485 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:23,547 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:24,551 - INFO    - Read WAV file with 1 channel and 72360 samples (format int16)
+2025-09-29 13:52:24,553 - WARNING - Expyfun: Resampling 1.64 seconds of audio
+2025-09-29 13:52:24,596 - EXP     - Expyfun: Loading 80118 samples to buffer
+2025-09-29 13:52:24,772 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_04-02.wav
+2025-09-29 13:52:24,772 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:24,773 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:24,814 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:26,472 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:26,473 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:28,264 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:28,876 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:28,930 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:29,933 - INFO    - Read WAV file with 1 channel and 67752 samples (format int16)
+2025-09-29 13:52:29,936 - WARNING - Expyfun: Resampling 1.54 seconds of audio
+2025-09-29 13:52:29,968 - EXP     - Expyfun: Loading 75016 samples to buffer
+2025-09-29 13:52:30,133 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_04-04.wav
+2025-09-29 13:52:30,133 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:30,134 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:30,175 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:31,717 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:31,717 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:33,447 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:34,868 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:34,931 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:35,933 - INFO    - Read WAV file with 1 channel and 51013 samples (format int16)
+2025-09-29 13:52:35,935 - WARNING - Expyfun: Resampling 1.16 seconds of audio
+2025-09-29 13:52:35,967 - EXP     - Expyfun: Loading 56482 samples to buffer
+2025-09-29 13:52:36,092 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_04-05.wav
+2025-09-29 13:52:36,092 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:36,093 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:36,135 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:37,305 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:37,305 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:38,647 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:40,068 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:40,113 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:41,117 - INFO    - Read WAV file with 1 channel and 79683 samples (format int16)
+2025-09-29 13:52:41,121 - WARNING - Expyfun: Resampling 1.81 seconds of audio
+2025-09-29 13:52:41,157 - EXP     - Expyfun: Loading 88226 samples to buffer
+2025-09-29 13:52:41,351 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_04-08.wav
+2025-09-29 13:52:41,352 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:41,352 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:41,393 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:43,205 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:43,205 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:45,147 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:46,100 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:46,147 - EXP     - Expyfun: Trial OK
+2025-09-29 13:52:47,151 - INFO    - Read WAV file with 1 channel and 74901 samples (format int16)
+2025-09-29 13:52:47,152 - WARNING - Expyfun: Resampling 1.7 seconds of audio
+2025-09-29 13:52:47,188 - EXP     - Expyfun: Loading 82932 samples to buffer
+2025-09-29 13:52:47,371 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_05-02.wav
+2025-09-29 13:52:47,371 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:52:47,371 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:52:47,412 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:52:49,129 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:52:49,130 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:52:51,080 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:52:52,501 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:52:52,547 - EXP     - Expyfun: Trial OK
+2025-09-29 13:53:40,548 - INFO    - Read WAV file with 1 channel and 85011 samples (format int16)
+2025-09-29 13:53:40,549 - WARNING - Expyfun: Resampling 1.93 seconds of audio
+2025-09-29 13:53:40,564 - EXP     - Expyfun: Loading 94126 samples to buffer
+2025-09-29 13:53:40,769 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_05-05.wav
+2025-09-29 13:53:40,770 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:53:40,770 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:53:40,811 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:53:42,759 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:53:42,759 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:53:43,530 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:53:45,978 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:53:46,030 - EXP     - Expyfun: Trial OK
+2025-09-29 13:53:47,033 - INFO    - Read WAV file with 1 channel and 76608 samples (format int16)
+2025-09-29 13:53:47,035 - WARNING - Expyfun: Resampling 1.74 seconds of audio
+2025-09-29 13:53:47,095 - EXP     - Expyfun: Loading 84822 samples to buffer
+2025-09-29 13:53:47,272 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_05-07.wav
+2025-09-29 13:53:47,272 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:53:47,273 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:53:47,314 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:53:49,068 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:53:49,068 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:53:50,096 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:53:52,355 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:53:52,413 - EXP     - Expyfun: Trial OK
+2025-09-29 13:53:53,416 - INFO    - Read WAV file with 1 channel and 68533 samples (format int16)
+2025-09-29 13:53:53,419 - WARNING - Expyfun: Resampling 1.55 seconds of audio
+2025-09-29 13:53:53,466 - EXP     - Expyfun: Loading 75880 samples to buffer
+2025-09-29 13:53:53,629 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_06-01.wav
+2025-09-29 13:53:53,629 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:53:53,629 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:53:53,670 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:53:55,234 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:53:55,234 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:53:56,063 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:53:58,138 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:53:58,197 - EXP     - Expyfun: Trial OK
+2025-09-29 13:53:59,200 - INFO    - Read WAV file with 1 channel and 68492 samples (format int16)
+2025-09-29 13:53:59,202 - WARNING - Expyfun: Resampling 1.55 seconds of audio
+2025-09-29 13:53:59,256 - EXP     - Expyfun: Loading 75836 samples to buffer
+2025-09-29 13:53:59,421 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_06-04.wav
+2025-09-29 13:53:59,421 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:53:59,421 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:53:59,463 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:01,034 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:01,034 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:01,963 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:04,037 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:04,096 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:05,098 - INFO    - Read WAV file with 1 channel and 77970 samples (format int16)
+2025-09-29 13:54:05,100 - WARNING - Expyfun: Resampling 1.77 seconds of audio
+2025-09-29 13:54:05,160 - EXP     - Expyfun: Loading 86330 samples to buffer
+2025-09-29 13:54:05,349 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_06-05.wav
+2025-09-29 13:54:05,350 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:05,350 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:05,391 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:07,165 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:07,165 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:08,180 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:10,468 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:10,529 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:11,532 - INFO    - Read WAV file with 1 channel and 72004 samples (format int16)
+2025-09-29 13:54:11,535 - WARNING - Expyfun: Resampling 1.63 seconds of audio
+2025-09-29 13:54:11,588 - EXP     - Expyfun: Loading 79724 samples to buffer
+2025-09-29 13:54:11,763 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_06-09.wav
+2025-09-29 13:54:11,763 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:11,764 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:11,805 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:13,446 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:13,446 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:14,479 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:16,212 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:16,262 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:17,266 - INFO    - Read WAV file with 1 channel and 89203 samples (format int16)
+2025-09-29 13:54:17,269 - WARNING - Expyfun: Resampling 2.02 seconds of audio
+2025-09-29 13:54:17,318 - EXP     - Expyfun: Loading 98766 samples to buffer
+2025-09-29 13:54:17,534 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_06-10.wav
+2025-09-29 13:54:17,534 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:17,535 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:17,575 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:19,603 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:19,603 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:20,346 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:22,889 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:22,945 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:23,948 - INFO    - Read WAV file with 1 channel and 66716 samples (format int16)
+2025-09-29 13:54:23,951 - WARNING - Expyfun: Resampling 1.51 seconds of audio
+2025-09-29 13:54:23,992 - EXP     - Expyfun: Loading 73868 samples to buffer
+2025-09-29 13:54:24,145 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_07-02.wav
+2025-09-29 13:54:24,146 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:24,146 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:24,188 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:25,709 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:25,709 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:26,529 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:28,563 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:28,612 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:29,616 - INFO    - Read WAV file with 1 channel and 93577 samples (format int16)
+2025-09-29 13:54:29,619 - WARNING - Expyfun: Resampling 2.12 seconds of audio
+2025-09-29 13:54:29,680 - EXP     - Expyfun: Loading 103610 samples to buffer
+2025-09-29 13:54:29,899 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_07-08.wav
+2025-09-29 13:54:29,900 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:29,900 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:29,941 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:32,068 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:32,069 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:32,963 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:33,564 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:33,612 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:34,615 - INFO    - Read WAV file with 1 channel and 71446 samples (format int16)
+2025-09-29 13:54:34,618 - WARNING - Expyfun: Resampling 1.62 seconds of audio
+2025-09-29 13:54:34,661 - EXP     - Expyfun: Loading 79106 samples to buffer
+2025-09-29 13:54:34,830 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_07-09.wav
+2025-09-29 13:54:34,830 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:34,831 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:34,871 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:54:36,500 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:54:36,500 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:54:37,512 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:54:39,653 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:54:39,713 - EXP     - Expyfun: Trial OK
+2025-09-29 13:54:58,896 - INFO    - Read WAV file with 1 channel and 86889 samples (format int16)
+2025-09-29 13:54:58,898 - WARNING - Expyfun: Resampling 1.97 seconds of audio
+2025-09-29 13:54:58,943 - EXP     - Expyfun: Loading 96204 samples to buffer
+2025-09-29 13:54:59,147 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_07-10.wav
+2025-09-29 13:54:59,148 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:54:59,148 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:54:59,189 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:01,166 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:01,167 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:01,996 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:04,487 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:04,546 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:05,548 - INFO    - Read WAV file with 1 channel and 74903 samples (format int16)
+2025-09-29 13:55:05,551 - WARNING - Expyfun: Resampling 1.7 seconds of audio
+2025-09-29 13:55:05,603 - EXP     - Expyfun: Loading 82934 samples to buffer
+2025-09-29 13:55:05,782 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_08-02.wav
+2025-09-29 13:55:05,783 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:05,783 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:05,824 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:07,528 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:07,528 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:08,446 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:10,665 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:10,712 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:11,714 - INFO    - Read WAV file with 1 channel and 69239 samples (format int16)
+2025-09-29 13:55:11,717 - WARNING - Expyfun: Resampling 1.57 seconds of audio
+2025-09-29 13:55:11,756 - EXP     - Expyfun: Loading 76662 samples to buffer
+2025-09-29 13:55:11,926 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_08-04.wav
+2025-09-29 13:55:11,926 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:11,927 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:11,968 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:13,549 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:13,550 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:14,529 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:16,620 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:16,679 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:17,681 - INFO    - Read WAV file with 1 channel and 69029 samples (format int16)
+2025-09-29 13:55:17,683 - WARNING - Expyfun: Resampling 1.57 seconds of audio
+2025-09-29 13:55:17,733 - EXP     - Expyfun: Loading 76430 samples to buffer
+2025-09-29 13:55:17,890 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_08-07.wav
+2025-09-29 13:55:17,891 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:17,891 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:17,932 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:19,511 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:19,512 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:20,462 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:22,548 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:22,595 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:23,599 - INFO    - Read WAV file with 1 channel and 91070 samples (format int16)
+2025-09-29 13:55:23,603 - WARNING - Expyfun: Resampling 2.07 seconds of audio
+2025-09-29 13:55:23,673 - EXP     - Expyfun: Loading 100834 samples to buffer
+2025-09-29 13:55:23,889 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_08-08.wav
+2025-09-29 13:55:23,889 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:23,890 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:23,931 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:26,011 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:26,011 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:26,913 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:29,499 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:29,545 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:30,548 - INFO    - Read WAV file with 1 channel and 69599 samples (format int16)
+2025-09-29 13:55:30,551 - WARNING - Expyfun: Resampling 1.58 seconds of audio
+2025-09-29 13:55:30,589 - EXP     - Expyfun: Loading 77060 samples to buffer
+2025-09-29 13:55:30,760 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_10-06.wav
+2025-09-29 13:55:30,760 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:30,760 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:30,801 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:32,391 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:32,391 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:33,246 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:35,345 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:35,395 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:36,398 - INFO    - Read WAV file with 1 channel and 52152 samples (format int16)
+2025-09-29 13:55:36,400 - WARNING - Expyfun: Resampling 1.18 seconds of audio
+2025-09-29 13:55:36,434 - EXP     - Expyfun: Loading 57744 samples to buffer
+2025-09-29 13:55:36,551 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_10-09.wav
+2025-09-29 13:55:36,552 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:36,552 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:36,594 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:37,795 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:37,795 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:38,612 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:40,315 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:40,361 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:41,364 - INFO    - Read WAV file with 1 channel and 62110 samples (format int16)
+2025-09-29 13:55:41,366 - WARNING - Expyfun: Resampling 1.41 seconds of audio
+2025-09-29 13:55:41,394 - EXP     - Expyfun: Loading 68770 samples to buffer
+2025-09-29 13:55:41,537 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_10-10.wav
+2025-09-29 13:55:41,537 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:41,538 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:41,579 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:43,004 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:43,004 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:43,978 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:45,908 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:45,961 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:46,965 - INFO    - Read WAV file with 1 channel and 74128 samples (format int16)
+2025-09-29 13:55:46,967 - WARNING - Expyfun: Resampling 1.68 seconds of audio
+2025-09-29 13:55:46,991 - EXP     - Expyfun: Loading 82076 samples to buffer
+2025-09-29 13:55:47,174 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_11-05.wav
+2025-09-29 13:55:47,174 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:47,174 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:47,216 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:48,910 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:48,911 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:49,962 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:52,163 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:52,211 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:53,215 - INFO    - Read WAV file with 1 channel and 82416 samples (format int16)
+2025-09-29 13:55:53,217 - WARNING - Expyfun: Resampling 1.87 seconds of audio
+2025-09-29 13:55:53,279 - EXP     - Expyfun: Loading 91252 samples to buffer
+2025-09-29 13:55:53,478 - EXP     - Expyfun: Stamp trial ID to ec_id  : NWF03_11-07.wav
+2025-09-29 13:55:53,479 - EXP     - Expyfun: Stamp trial ID to ttl_id : [0, 0]
+2025-09-29 13:55:53,479 - EXP     - Stamping TTL triggers: [4 4]
+2025-09-29 13:55:53,521 - EXP     - Expyfun: Starting stimuli: flipping screen and playing audio
+2025-09-29 13:55:55,398 - EXP     - Expyfun: Audio stopped and reset.
+2025-09-29 13:55:55,398 - EXP     - Stamping TTL triggers: [4, 8]
+2025-09-29 13:55:56,361 - EXP     - Stamping TTL triggers: [8, 4]
+2025-09-29 13:55:58,751 - EXP     - Stamping TTL triggers: [8, 8]
+2025-09-29 13:55:58,811 - EXP     - Expyfun: Trial OK
+2025-09-29 13:55:59,811 - INFO    - Expyfun: Exiting
+2025-09-29 13:55:59,852 - EXP     - Expyfun: Audio stopped and reset.

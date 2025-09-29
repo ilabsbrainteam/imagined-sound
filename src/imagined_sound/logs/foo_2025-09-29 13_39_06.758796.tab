@@ -1,0 +1,5 @@
+# {"exp_name": "imagined-sound", "audio_controller": null, "response_device": null, "stim_rms": 0.01, "stim_fs": 44100, "stim_db": 65, "noise_db": 45, "noise_array": null, "output_dir": "logs", "window_size": null, "screen_num": null, "full_screen": true, "force_quit": ["lctrl", "rctrl"], "participant": "foo", "monitor": null, "trigger_controller": null, "session": "999", "check_rms": null, "suppress_resamp": false, "version": "dev", "safe_flipping": null, "n_channels": 2, "trigger_duration": 0.01, "joystick": false, "verbose": null, "date": "2025-09-29 13_39_06.758796", "file": "C:\\Users\\stim\\MEGLab_Code\\GitHub_Packages\\expytest_packages\\imagined-sound\\src\\imagined_sound\\run_experiment.py", "version_used": "2.0.0.dev0"}
+timestamp	event	value
+2.750407599960454	flip	2.750402199977543
+2.766084000002593	flip	2.7660805999767035
+2.7853092000004835	stop	None

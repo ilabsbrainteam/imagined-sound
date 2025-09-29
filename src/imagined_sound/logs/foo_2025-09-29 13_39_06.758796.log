@@ -1,0 +1,13 @@
+2025-09-29 13:39:06,762 - INFO    - Expyfun: Using version 2.0.0.dev0 (requested dev)
+2025-09-29 13:39:06,766 - INFO    - Expyfun: Setting up TDT
+2025-09-29 13:39:07,511 - INFO    - Expyfun: RPcoX connection established
+2025-09-29 13:39:07,908 - INFO    - Expyfun: Circuit loaded to RZ6 via GB:
+C:\Users\stim\MEGLab_Code\GitHub_Packages\expytest_packages\imagined-sound\.pixi\envs\default\Lib\site-packages\expyfun\data\expCircuitF32_RZ6.rcx
+2025-09-29 13:39:07,909 - INFO    - Expyfun: TDT circuit running
+2025-09-29 13:39:08,159 - INFO    - Expyfun: Setting TDT delay to 44
+2025-09-29 13:39:08,160 - INFO    - Expyfun: Setting TDT trigger delay to 3
+2025-09-29 13:39:08,257 - WARNING - Expyfun: Mismatch between reported stim sample rate (44100) and device sample rate (24414.0625). Experiment Controller will resample for you, but this takes a non-trivial amount of processing time and may compromise your experimental timing and/or cause artifacts.
+2025-09-29 13:39:08,257 - INFO    - Expyfun: Setting up screen
+2025-09-29 13:39:09,453 - EXP     - Expyfun: Set screen visibility True
+2025-09-29 13:39:09,500 - INFO    - Expyfun: Exiting
+2025-09-29 13:39:09,519 - EXP     - Expyfun: Audio stopped and reset.

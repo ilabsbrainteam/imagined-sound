@@ -1,0 +1,17 @@
+# {"exp_name": "imagined-sound", "audio_controller": null, "response_device": null, "stim_rms": 0.01, "stim_fs": 44100, "stim_db": 65, "noise_db": 45, "noise_array": null, "output_dir": "logs", "window_size": [800, 600], "screen_num": 1, "full_screen": false, "force_quit": ["lctrl", "rctrl"], "participant": "foo", "monitor": null, "trigger_controller": null, "session": "999", "check_rms": null, "suppress_resamp": false, "version": "dev", "safe_flipping": null, "n_channels": 2, "trigger_duration": 0.01, "joystick": false, "verbose": null, "date": "2025-09-29 13_47_34.073151", "file": "C:\\Users\\stim\\MEGLab_Code\\GitHub_Packages\\expytest_packages\\imagined-sound\\src\\imagined_sound\\run_experiment.py", "version_used": "2.0.0.dev0"}
+timestamp	event	value
+1.7900737999589182	flip	1.7900681999744847
+1.803981599980034	flip	1.803977900010068
+1.820152500004042	flip	1.8201505999895744
+2.503402400005143	screen_text	Welcome to the experiment! Soon, you will hear some sounds, and will be asked to do different things in response to those sounds. Sometimes the sounds will be music, sometimes people speaking. The sounds are grouped into blocks; each block will have different instructions for what to do when each sound finishes. Press any key to see the instructions for the first block.
+2.503571200009901	flip	2.5033982999739237
+13.614540400041733	keypress	enter
+13.619287199981045	flip	13.619285399967339
+13.636857500008773	screen_text	In this block, you will hear sentences. After the sentence ends, there will be a brief delay and then the fixation circle will change color. If it turns {color (187, 85, 102, 255)}pink{color (255, 255, 255, 255)} press the response button as soon as you can. If it turns {color (221, 170, 51, 255)}yellow{color (255, 255, 255, 255)} do not respond, the next trial will start automatically. Press any key to continue.
+13.636924599995837	flip	13.636855299992021
+27.629855300008785	keypress	1
+27.63657219999004	flip	27.636568499961868
+27.654767800006084	screen_text	Here we go!
+27.65483839996159	flip	27.654765699990094
+28.069239799981005	flip	28.069237599964254
+28.09108290000586	stop	None

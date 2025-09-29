@@ -1,0 +1,110 @@
+# {"exp_name": "imagined-sound", "audio_controller": null, "response_device": null, "stim_rms": 0.01, "stim_fs": 44100, "stim_db": 65, "noise_db": 45, "noise_array": null, "output_dir": "logs", "window_size": [1200, 900], "screen_num": 1, "full_screen": false, "force_quit": ["lctrl", "rctrl"], "participant": "foo", "monitor": null, "trigger_controller": null, "session": "999", "check_rms": null, "suppress_resamp": false, "version": "dev", "safe_flipping": null, "n_channels": 2, "trigger_duration": 0.01, "joystick": false, "verbose": null, "date": "2025-09-29 13_49_38.722565", "file": "C:\\Users\\stim\\MEGLab_Code\\GitHub_Packages\\expytest_packages\\imagined-sound\\src\\imagined_sound\\run_experiment.py", "version_used": "2.0.0.dev0"}
+timestamp	event	value
+1.7544626999879256	flip	1.7544581000111066
+1.7671216999879107	flip	1.7671190000255592
+1.782764000003226	flip	1.782762399991043
+1.9676083999802358	screen_text	Welcome to the experiment! Soon, you will hear some sounds, and will be asked to do different things in response to those sounds. Sometimes the sounds will be music, sometimes people speaking. The sounds are grouped into blocks; each block will have different instructions for what to do when each sound finishes. Press any key to see the instructions for the first block.
+1.9677725000074133	flip	1.967553600028623
+3.889045999967493	keypress	enter
+3.8982901999843307	flip	3.898288600030355
+3.9158565999823622	screen_text	In this block, you will hear sentences. After the sentence ends, there will be a brief delay and then the fixation circle will change color. If it turns {color (187, 85, 102, 255)}pink{color (255, 255, 255, 255)} press the response button as soon as you can. If it turns {color (221, 170, 51, 255)}yellow{color (255, 255, 255, 255)} do not respond, the next trial will start automatically. Press any key to continue.
+3.915928600006737	flip	3.9158545000245795
+4.888514599995688	keypress	enter
+4.898039299994707	flip	4.898037299979478
+4.915902299981099	screen_text	Here we go!
+4.915966000000481	flip	4.915900100022554
+5.331383900018409	flip	5.331381600000896
+9.554728500021156	trial_id	NWF03_01-07.wav
+9.615662600030191	play	None
+9.615803900000174	flip	9.615502799977548
+11.064898999989964	stop	None
+11.098816299985629	flip	11.098812800017186
+12.682233300001826	flip	12.6822282000212
+14.148248700017575	flip	14.14824559999397
+14.148387400025968	stimulus began at 9.615502799977548. Response period began at 12.6822282000212, ended at 14.103190399997402 (1.420962199976202 s duration). Button press at <NONE>	None
+14.148506300000008	trial_ok	None
+15.372336000029463	trial_id	NWF03_02-01.wav
+15.432309099996928	play	None
+15.432444999984	flip	15.432180300005712
+17.09636090003187	stop	None
+17.13187669997569	flip	17.13187330000801
+19.04875830002129	flip	19.048753099981695
+20.515977200004272	flip	20.515974099980667
+20.516117500024848	stimulus began at 15.432180300005712. Response period began at 19.048753099981695, ended at 20.46996100002434 (1.4212079000426456 s duration). Button press at <NONE>	None
+20.516246300016064	trial_ok	None
+21.743067800009158	trial_id	NWF03_02-06.wav
+21.798513400019147	play	None
+21.79861009999877	flip	21.79840010002954
+23.40787709999131	stop	None
+23.4486343000317	flip	23.448630500002764
+25.2654263000004	flip	25.265421200019773
+26.74846949998755	flip	26.748466000019107
+26.74862500000745	stimulus began at 21.79840010002954. Response period began at 25.265421200019773, ended at 26.68669250002131 (1.4212713000015356 s duration). Button press at <NONE>	None
+26.74876220000442	trial_ok	None
+28.0237401999766	trial_id	NWF03_03-02.wav
+28.08248739998089	play	None
+28.08262190001551	flip	28.082306800002698
+30.16520029999083	stop	None
+30.199671900016256	flip	30.199667799985036
+32.56524309999077	flip	32.56523890001699
+34.03132960002404	flip	34.03132650000043
+34.03146079997532	stimulus began at 28.082306800002698. Response period began at 32.56523890001699, ended at 33.98617460002424 (1.4209357000072487 s duration). Button press at <NONE>	None
+34.031571900006384	trial_ok	None
+35.24132989998907	trial_id	NWF03_03-10.wav
+35.2987323999987	play	None
+35.29885890003061	flip	35.298609799996484
+36.75574360002065	stop	None
+36.782291000010446	flip	36.78228729998227
+38.29863169998862	flip	38.29862780001713
+39.76444950001314	flip	39.764446899993345
+39.76455939997686	stimulus began at 35.298609799996484. Response period began at 38.29862780001713, ended at 39.71982860000571 (1.4212007999885827 s duration). Button press at <NONE>	None
+39.76464810001198	trial_ok	None
+40.99745070002973	trial_id	NWF03_04-02.wav
+41.04851980000967	play	None
+41.04865690000588	flip	41.04838649998419
+42.69004930002848	stop	None
+42.71486649999861	flip	42.714863000030164
+44.465038700029254	flip	44.46503500000108
+45.948334000015166	flip	45.94832939998014
+45.94849650003016	stimulus began at 41.04838649998419. Response period began at 44.46503500000108, ended at 45.88582249998581 (1.4207874999847263 s duration). Button press at <NONE>	None
+45.948630600003526	trial_ok	None
+47.141923399991356	trial_id	NWF03_04-04.wav
+47.19783640000969	play	None
+47.197921800019685	flip	47.197740000032354
+48.73441490001278	stop	None
+48.76519860001281	flip	48.76519429998007
+50.46516959997825	flip	50.46516419999534
+51.93060630001128	flip	51.93060429999605
+51.930695299990475	stimulus began at 47.197740000032354. Response period began at 50.46516419999534, ended at 51.886202300025616 (1.4210381000302732 s duration). Button press at <NONE>	None
+51.93077049998101	trial_ok	None
+53.09095340000931	trial_id	NWF03_04-05.wav
+53.14833330002148	play	None
+53.148477700015064	flip	53.14820470003178
+54.305517100030556	stop	None
+54.331708499987144	flip	54.331704600015655
+55.6488260999904	flip	55.64882080000825
+57.131641099986155	flip	57.13163610000629
+57.13180299999658	stimulus began at 53.14820470003178. Response period began at 55.64882080000825, ended at 57.06987210002262 (1.4210513000143692 s duration). Button press at <NONE>	None
+57.131937300029676	trial_ok	None
+58.3598966000136	trial_id	NWF03_04-08.wav
+58.41495499998564	play	None
+58.41508300002897	flip	58.414833199989516
+60.222136299998965	stop	None
+60.2482461000327	flip	60.24824250000529
+62.1648466999759	flip	62.164841999998316
+63.63114910002332	flip	63.631146300002
+63.631287900032476	stimulus began at 58.414833199989516. Response period began at 62.164841999998316, ended at 63.585737799992785 (1.4208957999944687 s duration). Button press at <NONE>	None
+63.63140489999205	trial_ok	None
+64.8540015000035	trial_id	NWF03_05-02.wav
+64.91526769998018	play	None
+64.91539510001894	flip	64.91514800000004
+66.61457600002177	stop	None
+66.64818620000733	flip	66.6481823999784
+68.56483589997515	flip	68.5648319000029
+70.03165070002433	flip	70.03164770000149
+70.03178760001902	stimulus began at 64.91514800000004. Response period began at 68.5648319000029, ended at 69.98565079999389 (1.4208188999909908 s duration). Button press at <NONE>	None
+70.03190439997707	trial_ok	None
+71.09809009998571	screen_text	In this block, you will hear sentences. After the sentence ends, there will be a brief delay and then the fixation circle will change color (either {color (187, 85, 102, 255)}pink{color (255, 255, 255, 255)} or {color (221, 170, 51, 255)}yellow{color (255, 255, 255, 255)}). If it turns {color (187, 85, 102, 255)}pink{color (255, 255, 255, 255)}, imagine that you are hearing the sentence again (but do not repeat it out loud) and press the response button when you are finished imagining the sentence. If the fixation circle turned {color (221, 170, 51, 255)}yellow{color (255, 255, 255, 255)}, imagine that you are hearing the sentence again, but do NOT press the response button; the next trial will start automatically. Press any key to continue.
+71.09825899999123	flip	71.09808610001346
+100.68063319998328	keypress	lctrl
+100.69378570001572	stop	None

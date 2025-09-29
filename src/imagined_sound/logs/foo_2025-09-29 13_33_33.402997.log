@@ -1,0 +1,4 @@
+2025-09-29 13:33:33,411 - INFO    - Expyfun: Using version 2.0.0.dev0 (requested dev)
+2025-09-29 13:33:33,433 - INFO    - Expyfun: Setting up TDT
+2025-09-29 13:33:33,435 - INFO    - Expyfun: Exiting
+2025-09-29 13:33:33,435 - EXP     - Expyfun: Audio stopped and reset.
