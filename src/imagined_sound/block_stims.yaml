@@ -1,4 +1,4 @@
-click_some:
+click_all:
   - NWF03_01-07.wav
   - NWF03_02-01.wav
   - NWF03_02-06.wav
@@ -9,7 +9,6 @@ click_some:
   - NWF03_04-05.wav
   - NWF03_04-08.wav
   - NWF03_05-02.wav
-imagine_click_some:
   - NWF03_05-05.wav
   - NWF03_05-07.wav
   - NWF03_06-01.wav
@@ -31,7 +30,6 @@ imagine_click_all:
   - NWF03_10-10.wav
   - NWF03_11-05.wav
   - NWF03_11-07.wav
-unused:
   - NWF03_12-02.wav
   - NWF03_12-03.wav
   - NWF03_12-10.wav
@@ -42,6 +40,7 @@ unused:
   - NWF03_14-04.wav
   - NWF03_14-06.wav
   - NWF03_15-06.wav
+unused:
   - NWF03_15-07.wav
   - NWF03_15-09.wav
   - NWF03_15-10.wav
