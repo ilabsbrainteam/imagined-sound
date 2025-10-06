@@ -6,12 +6,16 @@ welcome: |
   Press any key to see the instructions for the first block.
 click_all: |
   In this block, you will hear sentences.
-  After the sentence ends, the fixation circle will change color.
-  When it changes back to grey, press the response button as soon as you can;
-  after a brief delay the next trial will start automatically.
+  After the sentence ends, there will be a short delay and then the fixation circle will change color.
+  When it changes color, press the response button as soon as you can;
+  after another brief delay the next trial will start automatically.
+click_all_practice: |
+  wait for the circle to change color before pressing the button.
 imagine_click_all: |
   In this block, you will hear sentences.
   After the sentence ends, the fixation circle will change color.
   When that happens, imagine that you are hearing the sentence again (but do not repeat it out loud),
   and press the response button when you are finished imagining the sentence.
   After a brief delay, the next trial will start automatically.
+imagine_click_all_practice: |
+  when the circle changes color, imagine hearing the sentence again, then press the button when finished.
