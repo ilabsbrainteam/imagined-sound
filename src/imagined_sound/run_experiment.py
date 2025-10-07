@@ -32,10 +32,7 @@ with open("block_stims.yaml") as fid:
     block_stims = yaml.safe_load(fid)
 
 # colors
-colors = dict(
-    pink=(187, 85, 102, 255),
-    yellow=(221, 170, 51, 255),
-)
+color = (187, 85, 102, 255)  # pink
 
 # gather up all the bits that differ between blocks
 blocks = {
@@ -49,7 +46,6 @@ _ = [
     if k.endswith("practice")
 ]
 _ = [blocks[k].update(stims=v) for k, v in block_stims.items() if k in blocks]
-_ = [blocks[k].update(click_all=(k.endswith("click_all"))) for k in blocks]
 
 with ExperimentController(
     "imagined-sound",
@@ -79,8 +75,6 @@ with ExperimentController(
         ec.screen_prompt("Here we go!", max_wait=block_start_delay, live_keys=[])
 
         for ix, stim_fname in enumerate(block["stims"], start=1):
-            # is this a button-press trial or not?
-            expect_press = True if block["click_all"] else ix % 3 == 0
             # load the audio file
             data, fs = read_wav(Path("stimuli") / "NWF003" / stim_fname)
             assert fs == 44100, "bad stimulus sampling frequency"
@@ -98,7 +92,6 @@ with ExperimentController(
 
             # larger, colored fixation dot during response period
             # convert pyglet RGBA (ints in [0 255]) to matplotlib RGBA (floats in [0 1])
-            color = colors["pink"] if expect_press else colors["yellow"]
             dot_col = tuple(map(lambda x: x / 255, color))
             dot.set_colors([dot_col, "k"])
             dot.set_radius(2 * radius, idx=0, units="pix")
@@ -129,20 +122,20 @@ with ExperimentController(
 
             # feedback
             if practice:
-                if (expect_press and pressed) or not (expect_press or pressed):
+                if pressed:
                     feedback = "✔"
-                    color = "w"
+                    feedback_color = "w"
                     dur = feedback_dur
                 else:
                     feedback = "✘"
-                    color = "k"
+                    feedback_color = "k"
                     dur = feedback_dur + 0.5
                     ec.screen_text(
                         "too slow", pos=(0, -0.075), wrap=False, font_size=18
                     )
                 dot.draw()
                 ec.screen_text(
-                    feedback, color=color, font_name="DejaVu Sans", wrap=False
+                    feedback, color=feedback_color, font_name="DejaVu Sans", wrap=False
                 )
                 _ = ec.flip()
                 ec.wait_secs(feedback_dur)
