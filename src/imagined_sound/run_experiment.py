@@ -1,6 +1,7 @@
 # Author: Daniel McCloy <dan@mccloy.info>
 #
 # License: BSD (3-clause)
+import re
 import yaml
 
 from pathlib import Path
@@ -30,6 +31,13 @@ paktc = " Press any key to continue."
 # load stimulus lists
 with open("block_stims.yaml") as fid:
     block_stims = yaml.safe_load(fid)
+
+# load keywords
+with open("keywords.yaml") as fid:
+    keywords = yaml.safe_load(fid)
+
+with open(Path("..") / ".." / "tools" / "usable_fakes.yaml") as fid:
+    fake_keywords = yaml.safe_load(fid)
 
 # colors
 color = (187, 85, 102, 255)  # pink
@@ -139,6 +147,34 @@ with ExperimentController(
                 )
                 _ = ec.flip()
                 ec.wait_secs(feedback_dur)
+
+            # logging
+            ec.write_data_line("stimulus", value=stim_fname, timestamp=t_stim_start)
+            ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
+            ec.write_data_line("response", value="start", timestamp=t_response_start)
+            ec.write_data_line("response", value="end", timestamp=t_response_end)
+            ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
+
+            # attention check
+            if ix % 3 == 0:
+                fake = bool(rng.choice(2))
+                if fake:
+                    keyword = fake_keywords.pop()
+                else:
+                    pattern = re.compile(r"NW[FM]0\d_(?P<sent_id>\d\d-\d\d).wav")
+                    stim_id = pattern.match(stim_fname).group("sent_id")
+                    keyword = keywords[stim_id]
+                attn_press, attn_time = ec.screen_prompt(
+                    f'Did you hear the word "{keyword}"?\n\nPress Y or N.',
+                    live_keys=["y", "n"],
+                    timestamp=True,
+                )
+                # True if pressed Y & it was real, or if pressed N & it was fake
+                correct = (attn_press.lower() == "y") != fake
+                ec.write_data_line("attn_is_fake", value=fake, timestamp=None)
+                ec.write_data_line("attn_keyword", value=keyword, timestamp=None)
+                ec.write_data_line("attn_correct", value=correct, timestamp=attn_time)
+
             # transition from "practice" to "real"
             if ix == n_practice:
                 ec.screen_prompt(
@@ -153,11 +189,6 @@ with ExperimentController(
             dot.draw()
             _ = ec.flip()
 
-            # logging and end trial
-            ec.write_data_line("stimulus", value=stim_fname, timestamp=t_stim_start)
-            ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
-            ec.write_data_line("response", value="start", timestamp=t_response_start)
-            ec.write_data_line("response", value="end", timestamp=t_response_end)
-            ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
+            # end trial
             ec.trial_ok()
             ec.wait_secs(inter_trial_interval)
