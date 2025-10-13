@@ -22,6 +22,8 @@ imagined_sound = { path = ".", editable = true }
 [tool.pixi.tasks]
 experiment = { cmd = "python run_experiment.py", cwd = "src/imagined_sound" }
 getstims = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "src/imagined_sound" }
+getstims_scp = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "src/imagined_sound" }
+
 
 [tool.pixi.dependencies]
 ipython = ">=9.5.0,<10"
