@@ -61,6 +61,7 @@ with ExperimentController(
     session="999",
     stim_fs=44100,
     stim_rms=0.01,
+    stim_db=65,  # TODO edit as needed for MEG Center
     check_rms=None,
     output_dir="logs",
     version="dev",
