@@ -116,7 +116,7 @@ with ExperimentController(
 
             # triage trial timing depending on which block we're in
             if block_name.startswith("imagine"):
-                pre_response_delay = 0.4  # short delay, then long time to imagine
+                pre_response_delay = 0.05  # short delay, then long time to imagine
                 max_wait = stim_duration * resp_duration_multiplier
             else:
                 pre_response_delay = stim_duration  # long time before buttonpress
