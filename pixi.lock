@@ -1474,7 +1474,7 @@ packages:
 - pypi: ./
   name: imagined-sound
   version: 0.1.0
-  sha256: a06eb3b576df27d7e9f8507a4f2af67145265193009fb944508cf655da7b7ae2
+  sha256: b36c01ce936dcc960178f04c435d3002811b36f91d9c26e08bb2ac501d4adcba
   requires_dist:
   - expyfun[all] @ git+https://github.com/LABSN/expyfun.git@2570c72
   requires_python: '>=3.11'
