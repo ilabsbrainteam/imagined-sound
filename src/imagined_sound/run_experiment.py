@@ -14,7 +14,7 @@ from expyfun.visual import FixationDot
 
 # set timing parameters
 block_start_delay = 0.5
-feedback_dur = 0.3
+feedback_dur = 0.5
 inter_trial_interval = 1.0
 n_practice = 4
 resp_duration_multiplier = 1.5  # multiplied by stimulus duration to get max timeout
@@ -40,7 +40,16 @@ with open(Path("..") / ".." / "tools" / "usable_fakes.yaml") as fid:
     fake_keywords = yaml.safe_load(fid)
 
 # colors
-color = (187, 85, 102, 255)  # pink
+colors = dict(pink=(187, 85, 102, 255), green=(78, 178, 101, 255))
+colors = {k: tuple(map(lambda x: x / 255, v)) for k, v in colors.items()}
+
+# feedback
+always = dict(font_name="DejaVu Sans", wrap=False)
+correct = dict(text="✔", color="w", **always)
+incorrect = dict(text="✘", color="k", **always)
+
+# needed for behavioral check (to look up keywords)
+attn_pattern = re.compile(r"NW[FM]0\d_(?P<sent_id>\d\d-\d\d).wav")
 
 # gather up all the bits that differ between blocks
 blocks = {
@@ -101,8 +110,7 @@ with ExperimentController(
 
             # larger, colored fixation dot during response period
             # convert pyglet RGBA (ints in [0 255]) to matplotlib RGBA (floats in [0 1])
-            dot_col = tuple(map(lambda x: x / 255, color))
-            dot.set_colors([dot_col, "k"])
+            dot.set_colors([colors["pink"], "k"])
             dot.set_radius(2 * radius, idx=0, units="pix")
             dot.draw()  # won't actually change until next flip
 
@@ -132,20 +140,14 @@ with ExperimentController(
             # feedback
             if practice:
                 if pressed:
-                    feedback = "✔"
-                    feedback_color = "w"
-                    dur = feedback_dur
+                    feedback_kwargs = correct
                 else:
-                    feedback = "✘"
-                    feedback_color = "k"
-                    dur = feedback_dur + 0.5
+                    feedback_kwargs = incorrect
                     ec.screen_text(
                         "too slow", pos=(0, -0.075), wrap=False, font_size=18
                     )
                 dot.draw()
-                ec.screen_text(
-                    feedback, color=feedback_color, font_name="DejaVu Sans", wrap=False
-                )
+                ec.screen_text(**feedback_kwargs)
                 _ = ec.flip()
                 ec.wait_secs(feedback_dur)
 
@@ -157,24 +159,34 @@ with ExperimentController(
             ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
 
             # attention check
-            if ix % 3 == 0:
+            if ix % 3 == 0 or (practice and ix % 2 == 0):
                 fake = bool(rng.choice(2))
                 if fake:
                     keyword = fake_keywords.pop()
                 else:
-                    pattern = re.compile(r"NW[FM]0\d_(?P<sent_id>\d\d-\d\d).wav")
-                    stim_id = pattern.match(stim_fname).group("sent_id")
+                    stim_id = attn_pattern.match(stim_fname).group("sent_id")
                     keyword = keywords[stim_id]
                 attn_press, attn_time = ec.screen_prompt(
-                    f'Did you hear the word "{keyword}"?\n\nPress Y or N.',
+                    f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
                     live_keys=["y", "n"],
                     timestamp=True,
                 )
                 # True if pressed Y & it was real, or if pressed N & it was fake
-                correct = (attn_press.lower() == "y") != fake
+                correct_response = (attn_press.lower() == "y") != fake
+                if practice:
+                    if correct_response:
+                        feedback_kwargs = correct | dict(color=colors["green"])
+                    else:
+                        feedback_kwargs = incorrect | dict(color=colors["pink"])
+                    ec.screen_text(**feedback_kwargs, font_size=48)
+                    _ = ec.flip()
+                    ec.wait_secs(feedback_dur)
+
                 ec.write_data_line("attn_is_fake", value=fake, timestamp=None)
                 ec.write_data_line("attn_keyword", value=keyword, timestamp=None)
-                ec.write_data_line("attn_correct", value=correct, timestamp=attn_time)
+                ec.write_data_line(
+                    "attn_correct", value=correct_response, timestamp=attn_time
+                )
 
             # transition from "practice" to "real"
             if ix == n_practice:
