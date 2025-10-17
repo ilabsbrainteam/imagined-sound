@@ -1,4 +1,4 @@
-click_all:
+click_speech:
   - NWF03_01-07.wav
   - NWF03_02-01.wav
   - NWF03_02-06.wav
@@ -97,7 +97,7 @@ click_all:
   - NWF03_34-01.wav
   - NWF03_34-02.wav
   - NWF03_34-05.wav
-imagine_click_all:
+imagine_speech:
   - NWF03_34-06.wav
   - NWF03_34-07.wav
   - NWF03_34-08.wav

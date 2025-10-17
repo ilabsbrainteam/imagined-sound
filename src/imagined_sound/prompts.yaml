@@ -4,19 +4,19 @@ welcome: |
   Sometimes the sounds will be music, sometimes people speaking.
   The sounds are grouped into blocks; each block will have different instructions for what to do when each sound finishes.
   Press any key to see the instructions for the first block.
-click_all: |
+click_speech: |
   In this block, you will hear sentences.
   After the sentence ends, there will be a short delay and then the fixation circle will change color.
   When it changes color, press the response button as soon as you can.
   After another brief delay the next trial will start automatically.
-click_all_practice: |
+click_speech_practice: |
   wait for the circle to change color before pressing the button.
-imagine_click_all: |
+imagine_speech: |
   In this block, you will hear sentences.
   After the sentence ends, the fixation circle will change color.
   When that happens, imagine that you are hearing the sentence again (but do not repeat it out loud),
   and press the response button when you are finished imagining the sentence.
   Usually, after a brief delay the next trial will start automatically,
   but some trials will have yes/no questions after them before the next trial starts.
-imagine_click_all_practice: |
+imagine_speech_practice: |
   when the circle changes color, imagine hearing the sentence again, then press the button when finished.
