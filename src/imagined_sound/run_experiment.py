@@ -226,3 +226,9 @@ with ExperimentController(
             # end trial
             ec.trial_ok()
             ec.wait_secs(inter_trial_interval)
+
+            # periodic rest breaks
+            if ix > n_practice and (ix - n_practice) % 10 == 0:
+                ec.screen_prompt(
+                    f"Rest break! When you're ready to go on,{paktc.lower()}"
+                )
