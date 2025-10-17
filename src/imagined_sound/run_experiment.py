@@ -18,6 +18,7 @@ feedback_dur = 0.5
 inter_trial_interval = 1.0
 n_practice = 4
 resp_duration_multiplier = 1.5  # multiplied by stimulus duration to get max timeout
+post_response_delay = 0.1  # 100 ms
 
 # random number generator
 rng = np.random.default_rng(seed=8675309)
@@ -110,46 +111,64 @@ with ExperimentController(
             ec.stamp_triggers([4, 8], wait_for_last=False)  # 4, 8 = audio over
 
             # larger, colored fixation dot during response period
-            dot.set_colors([colors["pink"], "k"])
+            # (won't actually appear until `dot.draw()` and `ec.flip()`)
+            color = "pink" if block_name.startswith("imagine") else "green"
+            dot.set_colors([colors[color], "k"])
             dot.set_radius(2 * radius, idx=0, units="pix")
-            dot.draw()  # won't actually change until next flip
 
             # triage trial timing depending on which block we're in
             if block_name.startswith("imagine"):
-                pre_response_delay = 0.05  # short delay, then long time to imagine
+                pre_response_delay = 0.1  # short delay, then long time to imagine
                 max_wait = stim_duration * resp_duration_multiplier
             else:
                 pre_response_delay = stim_duration  # long time before buttonpress
+                pre_response_delay += rng.uniform(low=0.0, high=0.4)  # 400ms jitter
                 max_wait = 1.5
-            pre_response_delay += rng.uniform(low=0.0, high=0.4)  # 400ms jitter
-            ec.wait_secs(pre_response_delay)
-            # TODO get presses during pre-response delay, to make sure the "rest" period
-            # isn't contaminated by motor activity
-            t_response_start = ec.flip()
 
-            # response period
-            ec.stamp_triggers([8, 4], wait_for_last=False)  # 8, 4 = begin response
+            # check for buttonpress during pre-response delay (so we know the
+            # "do-nothing" period isn't contaminated by motor activity)
             pressed, t_press = ec.wait_one_press(
-                min_wait=0.2,  # shouldn't be anyone faster than that...
-                max_wait=max_wait,
-                relative_to=t_response_start,
+                max_wait=pre_response_delay, timestamp=True
             )
-            t_response_end = t_press or ec.get_time()
-            ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
-
-            # feedback
-            if practice:
-                if pressed:
-                    feedback_kwargs = correct
-                else:
-                    feedback_kwargs = incorrect
+            if pressed:
+                # they responded too quickly; maybe give feedback
+                t_response_start = t_response_end = np.nan
+                if practice:
+                    feedback_kwargs = incorrect | dict(color=colors["pink"])
+                    ec.screen_text(**feedback_kwargs, font_size=48)
                     ec.screen_text(
-                        "too slow", pos=(0, -0.075), wrap=False, font_size=18
+                        "too fast", pos=(0, -0.075), wrap=False, font_size=18
                     )
+                    _ = ec.flip()
+                    ec.wait_secs(feedback_dur)
+                else:
+                    # show the dot briefly, so we don't give away the fact that the
+                    # press was early (by not showing the dot)
+                    dot.draw()
+                    _ = ec.flip()
+                    ec.wait_secs(post_response_delay)
+            else:  # they waited for the response cue
                 dot.draw()
-                ec.screen_text(**feedback_kwargs)
-                _ = ec.flip()
-                ec.wait_secs(feedback_dur)
+                # response period
+                t_response_start = ec.flip()
+                ec.stamp_triggers([8, 4], wait_for_last=False)  # 8, 4 = begin response
+                pressed, t_press = ec.wait_one_press(max_wait=max_wait)
+                t_response_end = t_press or ec.get_time()
+                ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
+
+                # feedback
+                if practice:
+                    if pressed:
+                        feedback_kwargs = correct
+                    else:
+                        feedback_kwargs = incorrect
+                        ec.screen_text(
+                            "too slow", pos=(0, -0.075), wrap=False, font_size=18
+                        )
+                    dot.draw()
+                    ec.screen_text(**feedback_kwargs)
+                    _ = ec.flip(when=t_response_end + post_response_delay)
+                    ec.wait_secs(feedback_dur)
 
             # logging
             ec.write_data_line("stimulus", value=stim_fname, timestamp=t_stim_start)
@@ -159,7 +178,9 @@ with ExperimentController(
             ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
 
             # attention check
-            if ix % 3 == 0 or (practice and ix % 2 == 0):
+            if block_name.startswith("imagine") and (
+                ix % 3 == 0 or (practice and ix % 2 == 0)
+            ):
                 fake = bool(rng.choice(2))
                 if fake:
                     keyword = fake_keywords.pop()
