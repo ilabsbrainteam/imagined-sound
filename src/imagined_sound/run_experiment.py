@@ -41,6 +41,7 @@ with open(Path("..") / ".." / "tools" / "usable_fakes.yaml") as fid:
 
 # colors
 colors = dict(pink=(187, 85, 102, 255), green=(78, 178, 101, 255))
+# convert pyglet RGBA (ints in [0 255]) to matplotlib RGBA (floats in [0 1])
 colors = {k: tuple(map(lambda x: x / 255, v)) for k, v in colors.items()}
 
 # feedback
@@ -109,7 +110,6 @@ with ExperimentController(
             ec.stamp_triggers([4, 8], wait_for_last=False)  # 4, 8 = audio over
 
             # larger, colored fixation dot during response period
-            # convert pyglet RGBA (ints in [0 255]) to matplotlib RGBA (floats in [0 1])
             dot.set_colors([colors["pink"], "k"])
             dot.set_radius(2 * radius, idx=0, units="pix")
             dot.draw()  # won't actually change until next flip
