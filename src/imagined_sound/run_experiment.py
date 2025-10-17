@@ -12,6 +12,12 @@ from expyfun import ExperimentController
 from expyfun.stimuli import read_wav, rms
 from expyfun.visual import FixationDot
 
+# are we running in the MSR at the MEG center, or piloting elsewhere?
+msr = True
+yes = 1 if msr else "y"
+no = 2 if msr else "n"
+live_keys = [yes, no]
+
 # set timing parameters
 block_start_delay = 0.5
 feedback_dur = 0.5
@@ -189,11 +195,11 @@ with ExperimentController(
                     keyword = keywords[stim_id]
                 attn_press, attn_time = ec.screen_prompt(
                     f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
-                    live_keys=["y", "n"],
+                    live_keys=live_keys,
                     timestamp=True,
                 )
                 # True if pressed Y & it was real, or if pressed N & it was fake
-                correct_response = (attn_press.lower() == "y") != fake
+                correct_response = (attn_press.lower() == yes) != fake
                 if practice:
                     if correct_response:
                         feedback_kwargs = correct | dict(color=colors["green"])
