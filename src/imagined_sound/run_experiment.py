@@ -15,7 +15,7 @@ from expyfun.visual import FixationDot
 # are we running in the MSR at the MEG center, or piloting elsewhere?
 msr = True
 yes = 1 if msr else "y"
-no = 2 if msr else "n"
+no = 4 if msr else "n"
 live_keys = [yes, no]
 
 # set timing parameters
