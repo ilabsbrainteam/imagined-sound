@@ -16,7 +16,7 @@ from expyfun.visual import FixationDot
 block_start_delay = 0.5
 feedback_dur = 0.5
 inter_trial_interval = 1.0
-n_practice = 4
+n_practice = 5
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
 post_response_delay = 0.1  # 100 ms
 
