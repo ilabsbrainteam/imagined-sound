@@ -33,7 +33,8 @@ rng = np.random.default_rng(seed=8675309)
 with open("prompts.yaml") as fid:
     prompts = yaml.safe_load(fid)
 prompts = {k: " ".join(v.strip().split("\n")) for k, v in prompts.items()}
-paktc = " Press any key to continue."
+resp = "button" if msr else "key"
+paktc = f" Press any {resp} to continue."
 
 # load stimulus lists
 with open("block_stims.yaml") as fid:
@@ -88,7 +89,7 @@ with ExperimentController(
     radius = dot._circles[0]._radius
 
     # welcome instructions
-    ec.screen_prompt(prompts["welcome"])
+    ec.screen_prompt(prompts["welcome"].format(resp=resp))
 
     # loop over blocks
     for block_name, block in blocks.items():

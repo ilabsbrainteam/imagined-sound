@@ -3,7 +3,7 @@ welcome: |
   Soon, you will hear some sounds, and will be asked to do different things in response to those sounds.
   Sometimes the sounds will be music, sometimes people speaking.
   The sounds are grouped into blocks; each block will have different instructions for what to do when each sound finishes.
-  Press any key to see the instructions for the first block.
+  Press any {resp} to see the instructions for the first block.
 click_speech: |
   In this block, you will hear sentences.
   After the sentence ends, there will be a short delay and then the fixation circle will change color.
