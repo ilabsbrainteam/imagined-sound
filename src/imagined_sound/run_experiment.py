@@ -15,7 +15,7 @@ from expyfun.visual import FixationDot
 # are we running in the MSR at the MEG center, or piloting elsewhere?
 msr = True
 yes = 1 if msr else "y"
-no = 4 if msr else "n"
+no = 4 if msr else "n"  # TODO yes,no should be adjacent buttons. TBD if 1,2 or 3,4
 live_keys = [yes, no]
 
 # set timing parameters
@@ -119,6 +119,8 @@ with ExperimentController(
 
             # larger, colored fixation dot during response period
             # (won't actually appear until `dot.draw()` and `ec.flip()`)
+            # TODO need to add icon/emoji as reminder of the task
+            #      (imagine+click or just click)
             color = "pink" if block_name.startswith("imagine") else "green"
             dot.set_colors([colors[color], "k"])
             dot.set_radius(2 * radius, idx=0, units="pix")
@@ -148,12 +150,17 @@ with ExperimentController(
                     )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
+                    # TODO: force a buttonpress to advance, when response was too quick?
+                    #       or just make `feedback_dur` longer?
                 else:
                     # show the dot briefly, so we don't give away the fact that the
                     # press was early (by not showing the dot)
                     dot.draw()
                     _ = ec.flip()
                     ec.wait_secs(post_response_delay)
+                # TODO maybe stamp triggers here anyway, even though they already
+                #      pressed (and thus contaminated the trial) and we don't really
+                #      care about the actual post-cue reaction time?
             else:  # they waited for the response cue
                 dot.draw()
                 # response period
@@ -164,6 +171,8 @@ with ExperimentController(
                 ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
 
                 # feedback
+                # TODO: debug feedback appearing early during practice of imagine block
+                #       (could it have been an early button press?)
                 if practice:
                     if pressed:
                         feedback_kwargs = correct
