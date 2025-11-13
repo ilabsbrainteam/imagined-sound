@@ -15,7 +15,7 @@ numpy = ">=2.3.4,<3"
 pyyaml = ">=6.0.3,<7"
 scp = ">=0.15.0,<0.16"
 
-[feature.expyfun.pypi-dependencies]
+[pypi-dependencies]
 expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
 
 [feature.expyfun.dependencies]
@@ -36,6 +36,9 @@ mne = "*"
 
 [feature.analysis.tasks]
 bidsify = { cmd = "python bidsify.py", cwd = "src/imagined_sound" }
+
+[feature.analysis.pypi-dependencies]
+mne-bids-pipeline = { path = "/opt/mne/pipeline" }
 
 [environments]
 expyfun = ["expyfun"]
