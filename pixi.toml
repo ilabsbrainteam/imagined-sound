@@ -6,8 +6,8 @@ platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
-getstims_rsync = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "src/imagined_sound" }
-getstims = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "src/imagined_sound" }
+getstims_rsync = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment" }
+getstims = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment" }
 
 [dependencies]
 ipython = ">=9.6.0,<10"
@@ -22,7 +22,7 @@ expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extra
 ffmpeg = "<8"
 
 [feature.expyfun.tasks]
-experiment = { cmd = "python run_experiment.py", cwd = "src/imagined_sound" }
+experiment = { cmd = "python run_experiment.py", cwd = "experiment" }
 
 [feature.stimuli.dependencies]
 music21 = "*"
