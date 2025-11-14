@@ -35,7 +35,7 @@ mne-bids = "*"
 mne = "*"
 
 [feature.analysis.tasks]
-bidsify = { cmd = "python bidsify.py", cwd = "src/imagined_sound" }
+bidsify = { cmd = "python bidsify.py", cwd = "analysis" }
 
 [feature.analysis.pypi-dependencies]
 mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "3c71234"}
