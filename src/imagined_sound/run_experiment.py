@@ -111,7 +111,7 @@ with ExperimentController(
             dot.draw()
 
             # start the trial
-            ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=[0, 0])
+            ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=[0, 0])  # 4, 4 = ID trial
             t_stim_start = ec.start_stimulus()  # sends a 1-trigger; "sentence start"
             ec.wait_secs(stim_duration)
             ec.stop()
