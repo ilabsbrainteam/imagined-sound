@@ -28,7 +28,7 @@ experiment = { cmd = "python run_experiment.py", cwd = "src/imagined_sound" }
 music21 = "*"
 
 [feature.stimuli.tasks]
-makestims = { cmd = "python make_stimuli.py", cwd = "tools" }
+makestims = { cmd = "python make_stimuli.py", cwd = "stimuli" }
 
 [feature.analysis.dependencies]
 mne-bids = "*"
