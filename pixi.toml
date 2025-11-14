@@ -38,7 +38,7 @@ mne = "*"
 bidsify = { cmd = "python bidsify.py", cwd = "src/imagined_sound" }
 
 [feature.analysis.pypi-dependencies]
-mne-bids-pipeline = { path = "/opt/mne/pipeline" }
+mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "3c71234"}
 
 [environments]
 expyfun = ["expyfun"]
