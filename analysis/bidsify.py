@@ -16,6 +16,8 @@ root = Path("/data/prism").resolve()
 orig_data = root / "orig-data"
 bids_root = root / "bids-data"
 metadata = root / "metadata"
+trial_info = root / "experiment-logs"
+trial_info.mkdir(exist_ok=True)
 
 mne.set_log_level("WARNING")
 # suppress messages about IAS / MaxShield
@@ -94,9 +96,6 @@ for data_folder in orig_data.rglob("*/*/"):
     # extract events
     events = score_func(raw=raw)
 
-    df = parse_expyfun_log(tabpath=tabpath)
-    assert events[events[:, -1] == 1].shape[0] == df.shape[0]
-
     write_raw_bids(
         raw=raw,
         events=events,
@@ -106,3 +105,8 @@ for data_folder in orig_data.rglob("*/*/"):
         anonymize=dict(daysback=DAYSBACK),
         overwrite=True,
     )
+
+    # parse experiment logs and write to disk
+    df = parse_expyfun_log(tabpath=tabpath)
+    assert events[events[:, -1] == 1].shape[0] == df.shape[0]
+    df.to_csv(trial_info / f"{subj}_trial_info.csv")
