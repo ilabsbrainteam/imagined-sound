@@ -7,11 +7,9 @@ from pathlib import Path
 from warnings import filterwarnings
 
 import mne
-import numpy as np
-import pandas as pd
-
-from expyfun.io import read_tab
 from mne_bids import BIDSPath, mark_channels, write_raw_bids
+
+from score import EVENT_DICT, parse_expyfun_log, score_func
 
 # path stuff
 root = Path("/data/prism").resolve()
@@ -35,21 +33,6 @@ filterwarnings(
     module="mne_bids",
 )
 
-# trigger dict
-triggers = {
-    (4, 4): 2,  # "id_trial",
-    (4, 8): 3,  # "stim_end",
-    (8, 4): 5,  # "resp_start",
-    (8, 8): 7,  # "resp_end",
-}
-event_dict = dict(
-    stim_start=1,
-    id_trial=2,
-    stim_end=3,
-    resp_start=5,
-    resp_end=7,
-)
-
 # metadata
 with open(metadata / "daysback.yaml") as fid:
     DAYSBACK = yaml.safe_load(fid)
@@ -62,12 +45,12 @@ bids_path = BIDSPath(
     root=bids_root, datatype="meg", suffix="meg", extension=".fif", task="speech"
 )
 
-#
+# filename patterns
 data_folder_pattern = re.compile(r"\w+/\d+")
 rec_pattern = re.compile(r"prism_(?P<subj>\w+)_(?P<run>\d+)_raw.fif")
 erm_pattern = re.compile(r"prism_(?P<subj>\w+)_erm_raw.fif")
 tab_pattern = re.compile(
-    r"prism_[a-zA-Z]{2}_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}\.\d{6}.tab"
+    r"prism_(?P<subj>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
 )
 
 for data_folder in orig_data.rglob("*/*/"):
@@ -108,62 +91,16 @@ for data_folder in orig_data.rglob("*/*/"):
             status="bad",
             descriptions="prebad",
         )
-    # TODO extract below into separate score func
     # extract events
-    tab = read_tab(tabpath)
-    df_list = []
-    for trial in tab:
-        foo = dict(
-            stim=trial["stimulus"][0][0],
-            stim_onset=trial["play"][0][1],
-            reaction_time=trial["response"][2][1],
-        )
-        for key in ("attn_keyword", "attn_correct", "attn_is_fake"):
-            if trial[key]:
-                val = trial[key][0][0]
-                if key in ("attn_correct", "attn_is_fake"):
-                    val = val == "True"
-                foo.update({key: val})
-            else:
-                foo.update({key: pd.NA})
-        attn_reaxtime = trial["attn_correct"][0][1] if trial["attn_correct"] else pd.NA
-        foo.update({"attn_reaction_time": attn_reaxtime})
-        df_list.append(foo)
-    df = pd.DataFrame(df_list)
-    events = mne.find_events(raw, shortest_event=1)
-    clean_events = list()
-    skip_next = False
-    for ix, row in enumerate(events):
-        if skip_next:
-            skip_next = False
-            continue
-        # ignore STI005 - STI008 (buttons)  # TODO don't ignore buttons
-        if row[-1] in (16, 32, 64, 128):
-            continue
-        # trigger was "1" → stim start
-        if row[-1] == 1:
-            clean_events.append(row)
-            continue
-        # trigger was odd → must have overlapped with a 1-trigger → stim start
-        if row[-1] % 2 == 1:
-            print(f"unexpected odd-valued event: {row[-1]}")
-            clean_events.append(row)
-            continue
-        seq = tuple(events[ix : (ix + 2), -1] % 16)
-        # sequence is in our dict of expected trigger sequences:
-        if new_ev := triggers.get(seq):
-            clean_events.append(np.array([*row[:2], new_ev]))
-            skip_next = True
-            continue
-        else:
-            raise RuntimeError("unexpected trigger sequence")
-    clean_events = np.vstack(clean_events)
-    stim_starts = clean_events[clean_events[:, -1] == 1]
-    # TODO extract above into separate score func
+    events = score_func(raw=raw)
+
+    df = parse_expyfun_log(tabpath=tabpath)
+    assert events[events[:, -1] == 1].shape[0] == df.shape[0]
+
     write_raw_bids(
         raw=raw,
-        events=clean_events,
-        event_id=event_dict,
+        events=events,
+        event_id=EVENT_DICT,
         bids_path=bids_path,
         empty_room=erm,
         anonymize=dict(daysback=DAYSBACK),
