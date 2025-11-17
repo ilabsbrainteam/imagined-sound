@@ -5,42 +5,23 @@ name = "prism"
 platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
-[tasks]
-getstims_rsync = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment" }
-getstims = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment" }
-
 [dependencies]
+ffmpeg = "<8"
 ipython = ">=9.6.0,<10"
+mne = "*"
+mne-bids = "*"
+music21 = "*"
 numpy = ">=2.3.4,<3"
 pyyaml = ">=6.0.3,<7"
 scp = ">=0.15.0,<0.16"
 
 [pypi-dependencies]
 expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
-
-[feature.expyfun.dependencies]
-ffmpeg = "<8"
-
-[feature.expyfun.tasks]
-experiment = { cmd = "python run_experiment.py", cwd = "experiment" }
-
-[feature.stimuli.dependencies]
-music21 = "*"
-
-[feature.stimuli.tasks]
-makestims = { cmd = "python make_stimuli.py", cwd = "stimuli" }
-
-[feature.analysis.dependencies]
-mne-bids = "*"
-mne = "*"
-
-[feature.analysis.tasks]
-bidsify = { cmd = "python bidsify.py", cwd = "analysis" }
-
-[feature.analysis.pypi-dependencies]
 mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "3c71234"}
 
-[environments]
-expyfun = ["expyfun"]
-stimuli = ["stimuli"]
-analysis = ["analysis"]
+[tasks]
+getstims_rsync = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment" }
+getstims = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment" }
+experiment = { cmd = "python run_experiment.py", cwd = "experiment" }
+makestims = { cmd = "python make_stimuli.py", cwd = "stimuli" }
+bidsify = { cmd = "python bidsify.py", cwd = "analysis" }
