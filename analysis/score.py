@@ -92,4 +92,4 @@ def score_func(raw):
         ],
         other_trial_events,
     )
-    return clean_events, df
+    return clean_events
