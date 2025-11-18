@@ -3,12 +3,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from yaml import safe_dump
 
 from mne_bids import find_matching_paths, get_entities_from_fname
 
 
 root = Path("/data/prism")
 bids_root = root / "bids-data"
+metadata = root / "metadata"
 
 event_files = find_matching_paths(root=bids_root, suffixes="events", extensions=".tsv")
 
@@ -58,3 +60,6 @@ for subj, blocks in epoch_durs.items():
         # pick an epoch duration that preserves 90% of trials
         cutoff = np.percentile(durs, 10)
         final_epoch_durs[subj][block] = int(durs[durs >= cutoff].min())
+
+with open(metadata / "derived-epoch-durs.yaml", "w") as fid:
+    safe_dump(final_epoch_durs, fid)
