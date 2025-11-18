@@ -87,12 +87,14 @@ _ = [
 if pilot == "music":
     blocks = {key: val for key, val in blocks.items() if not key.endswith("speech")}
 
-sub_ses = dict() if msr else dict(participant="foo", session="999")
+# edit stim_db as needed for MEG Center
+sub_ses = (
+    dict(stim_db=80) if msr else dict(participant="foo", session="999", stim_db=65)
+)
 with ExperimentController(
     "prism",
     stim_fs=44100,
     stim_rms=0.01,
-    stim_db=65,  # TODO edit as needed for MEG Center
     check_rms=None,
     output_dir="logs",
     version="dev",
