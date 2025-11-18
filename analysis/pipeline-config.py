@@ -1151,7 +1151,7 @@ with open(root / "metadata" / "derived-epoch-durs.yaml") as fid:
     _durs = safe_load(fid)
 
 durs = [val for key, dct in _durs.items() for val in dct.values()]
-_epochs_tmax = min(durs)
+_epochs_tmax = min(durs) / 1000.0
 
 epochs_tmax: float = _epochs_tmax
 """
