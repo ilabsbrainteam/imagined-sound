@@ -203,6 +203,8 @@ with ExperimentController(
                     ec.wait_secs(feedback_dur)
 
             # logging
+            ec.write_data_line("block", value=block_name)
+            ec.write_data_line("practice", value=practice)
             ec.write_data_line("stimulus", value=stim_fname, timestamp=t_stim_start)
             ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
             ec.write_data_line("response", value="start", timestamp=t_response_start)

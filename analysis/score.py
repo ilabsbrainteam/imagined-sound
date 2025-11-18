@@ -44,6 +44,7 @@ def parse_expyfun_log(tabpath):
     df_list = []
     for trial in tab:
         _row = dict(
+            block=trial["block"][0][0],
             stim=trial["stimulus"][0][0],
             stim_onset=trial["play"][0][1],
             reaction_time=trial["response"][2][1],
