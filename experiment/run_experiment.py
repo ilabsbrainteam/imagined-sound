@@ -17,6 +17,7 @@ msr = True
 yes = 1 if msr else "y"
 no = 2 if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
+pilot = "music"  # music or speech
 
 # set timing parameters
 block_start_delay = 0.5
@@ -44,7 +45,7 @@ with open("block_stims.yaml") as fid:
 with open("keywords.yaml") as fid:
     keywords = yaml.safe_load(fid)
 
-with open(Path("..") / ".." / "tools" / "usable_fakes.yaml") as fid:
+with open(Path("..") / "stimuli" / "usable_fakes.yaml") as fid:
     fake_keywords = yaml.safe_load(fid)
 
 # colors
@@ -60,6 +61,13 @@ incorrect = dict(text="✘", color="k", **always)
 # needed for behavioral check (to look up keywords)
 attn_pattern = re.compile(r"NW[FM]0\d_(?P<sent_id>\d\d-\d\d).wav")
 
+# triage type of pilot experiment
+stim_repetitions = 1
+stim_folder = "NWF003"
+if pilot == "music":
+    stim_repetitions = 6
+    stim_folder = "pilot-melodies"
+
 # gather up all the bits that differ between blocks
 blocks = {
     k: dict(prompt=v)
@@ -71,18 +79,24 @@ _ = [
     for k, v in prompts.items()
     if k.endswith("practice")
 ]
-_ = [blocks[k].update(stims=v) for k, v in block_stims.items() if k in blocks]
+_ = [
+    blocks[k].update(stims=v * stim_repetitions)
+    for k, v in block_stims.items()
+    if k in blocks
+]
+if pilot == "music":
+    blocks = {key: val for key, val in blocks.items() if not key.endswith("speech")}
 
+sub_ses = dict() if msr else dict(participant="foo", session="999")
 with ExperimentController(
-    "imagined-sound",
-    participant="foo",
-    session="999",
+    "prism",
     stim_fs=44100,
     stim_rms=0.01,
     stim_db=65,  # TODO edit as needed for MEG Center
     check_rms=None,
     output_dir="logs",
     version="dev",
+    **sub_ses,
 ) as ec:
     # we'll need this later
     dot = FixationDot(ec)
@@ -103,7 +117,7 @@ with ExperimentController(
 
         for ix, stim_fname in enumerate(block["stims"], start=1):
             # load the audio file
-            data, fs = read_wav(Path("stimuli") / "NWF003" / stim_fname)
+            data, fs = read_wav(Path("stimuli") / stim_folder / stim_fname)
             assert fs == 44100, "bad stimulus sampling frequency"
             rms_data = 0.01 * data / rms(data)
             ec.load_buffer(rms_data)

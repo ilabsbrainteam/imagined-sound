@@ -20,3 +20,17 @@ imagine_speech: |
   but some trials will have yes/no questions after them before the next trial starts.
 imagine_speech_practice: |
   when the circle changes color, imagine hearing the sentence again, then press the button when finished.
+click_music: |
+  In this block, you will hear music.
+  After the music ends, there will be a short delay and then the fixation circle will change color.
+  When it changes color, press the response button as soon as you can.
+  After another brief delay the next trial will start automatically.
+click_music_practice: |
+  wait for the circle to change color before pressing the button.
+imagine_music: |
+  In this block, you will hear music.
+  After the music ends, the fixation circle will change color.
+  When that happens, imagine that you are hearing the music again (but do not sing or hum it out loud),
+  and press the response button when you are finished imagining the music.
+imagine_music_practice: |
+  when the circle changes color, imagine hearing the music again, then press the button when finished.

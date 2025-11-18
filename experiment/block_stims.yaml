@@ -199,3 +199,25 @@ imagine_speech:
   - NWF03_72-05.wav
 unused:
   - NWF03_72-06.wav
+click_music:
+  - Music_01.wav
+  - Music_02.wav
+  - Music_03.wav
+  - Music_04.wav
+  - Music_05.wav
+  - Music_06.wav
+  - Music_07.wav
+  - Music_08.wav
+  - Music_09.wav
+  - Music_10.wav
+imagine_music:
+  - Music_01.wav
+  - Music_02.wav
+  - Music_03.wav
+  - Music_04.wav
+  - Music_05.wav
+  - Music_06.wav
+  - Music_07.wav
+  - Music_08.wav
+  - Music_09.wav
+  - Music_10.wav
