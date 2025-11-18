@@ -15,7 +15,7 @@ from expyfun.visual import FixationDot
 # are we running in the MSR at the MEG center, or piloting elsewhere?
 msr = True
 yes = 1 if msr else "y"
-no = 4 if msr else "n"  # TODO yes,no should be adjacent buttons. TBD if 1,2 or 3,4
+no = 2 if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
 
 # set timing parameters
