@@ -25,3 +25,5 @@ getstims = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment" }
 experiment = { cmd = "python run_experiment.py", cwd = "experiment" }
 makestims = { cmd = "python make_stimuli.py", cwd = "stimuli" }
 bidsify = { cmd = "python bidsify.py", cwd = "analysis" }
+epochdur = { cmd = "python precompute_epoch_length.py", cwd = "analysis" }
+pipeline = { cmd = "mne_bids_pipeline --config pipeline-config.py", cwd = "analysis", depends-on="epochdur" }
