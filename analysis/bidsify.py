@@ -7,7 +7,14 @@ from pathlib import Path
 from warnings import filterwarnings
 
 import mne
-from mne_bids import BIDSPath, mark_channels, write_raw_bids
+from mne_bids import (
+    BIDSPath,
+    mark_channels,
+    write_meg_calibration,
+    write_meg_crosstalk,
+    write_raw_bids,
+)
+
 
 from score import EVENT_DICT, parse_expyfun_log, score_func
 
@@ -16,6 +23,7 @@ root = Path("/data/prism").resolve()
 orig_data = root / "orig-data"
 bids_root = root / "bids-data"
 metadata = root / "metadata"
+cal_dir = root / "calibration"
 trial_info = root / "experiment-logs"
 trial_info.mkdir(exist_ok=True)
 
@@ -105,6 +113,11 @@ for data_folder in orig_data.rglob("*/*/"):
         anonymize=dict(daysback=DAYSBACK),
         overwrite=True,
     )
+
+    # write the fine-cal and crosstalk files (once per subject)
+    cal_path = BIDSPath(root=bids_root, subject=subj)
+    write_meg_calibration(cal_dir / "sss_cal_triux.dat", bids_path=cal_path)
+    write_meg_crosstalk(cal_dir / "ct_sparse_triux2.fif", bids_path=cal_path)
 
     # parse experiment logs and write to disk
     df = parse_expyfun_log(tabpath=tabpath)
