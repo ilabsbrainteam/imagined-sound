@@ -208,8 +208,10 @@ with ExperimentController(
             ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
 
             # attention check
-            if block_name.startswith("imagine") and (
-                ix % 3 == 0 or (practice and ix % 2 == 0)
+            if (
+                pilot != "music"
+                and block_name.startswith("imagine")
+                and (ix % 3 == 0 or (practice and ix % 2 == 0))
             ):
                 fake = bool(rng.choice(2))
                 if fake:
