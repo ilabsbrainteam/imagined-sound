@@ -68,6 +68,8 @@ for data_folder in orig_data.rglob("*/*/"):
     if not data_folder_pattern.match(str(_dirpath)):
         print(f"skipping folder {_dirpath}")
         continue
+    session = _dirpath.parts[-1]
+    bids_path.update(session=session)
     ermpaths = list()
     tabpaths = list()
     fpaths = list()
@@ -97,7 +99,7 @@ for data_folder in orig_data.rglob("*/*/"):
     if subj in prebads:
         mark_channels(
             bids_path=bids_path,
-            ch_names=prebads[subj],
+            ch_names=prebads[subj][int(session)],
             status="bad",
             descriptions="prebad",
         )
