@@ -1146,9 +1146,12 @@ The beginning of an epoch, relative to the respective event, in seconds.
     ```
 """
 
+# epoch duration is determined dynamically
 with open(root / "metadata" / "derived-epoch-durs.yaml") as fid:
-    derived_epoch_durs = safe_load(fid)
-_epochs_tmax = min(derived_epoch_durs[subjects[0]])
+    _durs = safe_load(fid)
+
+durs = [val for key, dct in _durs.items() for val in dct.values()]
+_epochs_tmax = min(durs)
 
 epochs_tmax: float = _epochs_tmax
 """
