@@ -43,7 +43,7 @@ def parse_expyfun_log(tabpath):
     tab = read_tab(tabpath)
     df_list = []
     for trial in tab:
-        foo = dict(
+        _row = dict(
             stim=trial["stimulus"][0][0],
             stim_onset=trial["play"][0][1],
             reaction_time=trial["response"][2][1],
@@ -53,12 +53,12 @@ def parse_expyfun_log(tabpath):
                 val = trial[key][0][0]
                 if key in ("attn_correct", "attn_is_fake"):
                     val = val == "True"
-                foo.update({key: val})
+                _row.update({key: val})
             else:
-                foo.update({key: pd.NA})
+                _row.update({key: pd.NA})
         attn_reaxtime = trial["attn_correct"][0][1] if trial["attn_correct"] else pd.NA
-        foo.update({"attn_reaction_time": attn_reaxtime})
-        df_list.append(foo)
+        _row.update({"attn_reaction_time": attn_reaxtime})
+        df_list.append(_row)
     return pd.DataFrame(df_list)
 
 
