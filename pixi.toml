@@ -17,7 +17,7 @@ scp = ">=0.15.0,<0.16"
 
 [pypi-dependencies]
 expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
-mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "3c71234"}
+mne-bids-pipeline = { path = "/opt/mne/pipeline", editable=true }
 
 [tasks]
 getstims_rsync = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment" }
