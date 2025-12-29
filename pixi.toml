@@ -8,22 +8,36 @@ version = "0.1.0"
 [dependencies]
 ffmpeg = "<8"
 ipython = ">=9.6.0,<10"
-mne = "*"
-mne-bids = "*"
-music21 = "*"
 numpy = ">=2.3.4,<3"
 pyyaml = ">=6.0.3,<7"
-scp = ">=0.15.0,<0.16"
 
 [pypi-dependencies]
-expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
-mne-bids-pipeline = { path = "/opt/mne/pipeline", editable=true }
+expyfun = {git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"]}
 
 [tasks]
-getstims_rsync = { cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment" }
-getstims = { cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment" }
-experiment = { cmd = "python run_experiment.py", cwd = "experiment" }
-makestims = { cmd = "python make_stimuli.py", cwd = "stimuli" }
-bidsify = { cmd = "python bidsify.py", cwd = "analysis" }
-epochdur = { cmd = "python precompute_epoch_length.py", cwd = "analysis" }
-pipeline = { cmd = "mne_bids_pipeline --config pipeline-config.py {{ args }}", cwd = "analysis", depends-on="epochdur", args = [{ arg = "args", default = "" }] }
+experiment = {cmd = "python run_experiment.py", cwd = "experiment"}
+bidsify = {cmd = "python bidsify.py", cwd = "analysis"}
+
+[environments]
+stimuli = ["stimuli"]
+analysis = ["analysis"]
+
+[feature.analysis.dependencies]
+mne = "*"
+mne-bids = "*"
+
+[feature.analysis.pypi-dependencies]
+mne-bids-pipeline = {path = "/opt/mne/pipeline", editable = true}
+
+[feature.analysis.tasks]
+epochdur = {cmd = "python precompute_epoch_length.py", cwd = "analysis"}
+pipeline = {cmd = "mne_bids_pipeline --config pipeline-config.py {{ args }}", cwd = "analysis", depends-on = "epochdur", args = [{arg = "args", default = ""}]}
+
+[feature.stimuli.dependencies]
+music21 = "*"
+scp = ">=0.15.0,<0.16"
+
+[feature.stimuli.tasks]
+getstims = {cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment"}
+getstims_rsync = {cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment"}
+makestims = {cmd = "python make_stimuli.py", cwd = "stimuli"}
