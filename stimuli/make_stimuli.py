@@ -146,4 +146,6 @@ for file_ix in range(n_stims):
 header = (score_outdir / "scores-header.ly").read_text()
 scores_path = score_outdir / "scores.ly"
 scores_path.write_text("\n".join([header, *list(map(str, scores))]))
-subprocess.run(["lilypond", "--pdf", f"--output={score_outdir}", str(scores_path)])
+subprocess.run(
+    ["lilypond", "--pdf", f"--output={score_outdir}/scores", str(scores_path)]
+)  # .pdf extension automatically added
