@@ -7,6 +7,7 @@ Experiment for imagined repetition of speech and music.
 Managed with `pixi`; most dependencies will be automatically installed when tasks are invoked. Exceptions:
 
 - music stimulus generation (`stimuli/make_stimuli.py`) requires `timidity` and `lilypond`, which are not available through conda-forge. For interactive listening via `music21`'s `Stream.show("midi")` syntax, I also needed `fluidsynth`.
+- `rsync` cannot be managed via `pixi` on windows. It's helpful to have it when loading the stimuli onto the experiment runner computer (via `pixi run rsyncstims`). The task `pixi run getstims` is an alternative that uses `scp` instead.
 
 # Setup
 
@@ -24,7 +25,7 @@ Managed with `pixi`; most dependencies will be automatically installed when task
   </settings>
 ```
 
-The program `synth` used as the value for `midiPath` is a small shell script at `~/.local/bin/synth`:
+The program `synth` used as the value for `midiPath` is a small shell script somewhere on your `PATH` (e.g., at `~/.local/bin/synth`):
 
 ```sh
 #!/usr/bin/bash
