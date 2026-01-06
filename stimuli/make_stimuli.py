@@ -7,7 +7,7 @@ import music21 as mm
 import numpy as np
 
 
-def is_score(obj):
+def is_lily_score(obj):
     return isinstance(obj, mm.lily.lilyObjects.LyScoreBlock)
 
 
@@ -140,7 +140,7 @@ for file_ix in range(n_stims):
     # assemble all scores
     converter = mm.lily.translate.LilypondConverter()
     converter.loadFromMusic21Object(s)
-    scores.extend(list(filter(is_score, converter.context.contents)))
+    scores.extend(list(filter(is_lily_score, converter.context.contents)))
 
 # write scores to disk
 header = (score_outdir / "scores-header.ly").read_text()
