@@ -34,9 +34,10 @@ epochdur = {cmd = "python precompute_epoch_length.py", cwd = "analysis"}
 pipeline = {cmd = "mne_bids_pipeline --config pipeline-config.py {{ args }}", cwd = "analysis", depends-on = "epochdur", args = [{arg = "args", default = ""}]}
 
 [feature.stimuli]
-dependencies = { music21 = "*" }
+channels = ["conda-forge", "bioconda"]
+dependencies = { fitter = "*", music21 = "*" }
 pypi-dependencies = { cmudict = "*", syllables = "*" }
 
 [feature.stimuli.tasks]
-makemusic = { cmd = "python make_stimuli.py", cwd = "stimuli" }
 countsyllables = { cmd = "python characterize_corpus.py", cwd = "stimuli" }
+makemusic = { cmd = "python make_stimuli.py", cwd = "stimuli", depends-on = "countsyllables" }
