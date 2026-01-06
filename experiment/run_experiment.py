@@ -19,6 +19,11 @@ no = 2 if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
 pilot = "music"  # music or speech
 
+# paths
+project_root = Path(__file__).parents[1]
+stim_metadata_dir = project_root / "stimuli" / "metadata"
+stim_file_dir = Path(__file__) / "stimuli"
+
 # set timing parameters
 block_start_delay = 0.5
 feedback_dur = 0.5
@@ -45,7 +50,7 @@ with open("block_stims.yaml") as fid:
 with open("keywords.yaml") as fid:
     keywords = yaml.safe_load(fid)
 
-with open(Path("..") / "stimuli" / "usable_fakes.yaml") as fid:
+with open(stim_metadata_dir / "usable_fakes.yaml") as fid:
     fake_keywords = yaml.safe_load(fid)
 
 # colors
@@ -119,7 +124,7 @@ with ExperimentController(
 
         for ix, stim_fname in enumerate(block["stims"], start=1):
             # load the audio file
-            data, fs = read_wav(Path("stimuli") / stim_folder / stim_fname)
+            data, fs = read_wav(stim_file_dir / stim_folder / stim_fname)
             assert fs == 44100, "bad stimulus sampling frequency"
             rms_data = 0.01 * data / rms(data)
             ec.load_buffer(rms_data)

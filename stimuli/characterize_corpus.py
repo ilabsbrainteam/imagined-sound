@@ -1,3 +1,4 @@
+# analyze the corpus of sentences to get total duration and number of syllables
 import re
 import wave
 
@@ -7,7 +8,7 @@ import cmudict
 import syllables
 import yaml
 
-cmu = cmudict.dict()
+cmu = cmudict.dict()  # expensive, so use singleton (not inside function)
 
 
 def count_syllables(sentence):
@@ -23,8 +24,12 @@ def count_syllables(sentence):
     return n_syllables
 
 
+# paths
+project_root = Path(__file__).parents[1]
+stim_metadata_dir = project_root / "stimuli" / "metadata"
+wav_dir = project_root / "experiment" / "stimuli" / "NWF003"
+
 # get duration of audio files
-wav_dir = Path(__file__).parents[1] / "experiment" / "stimuli" / "NWF003"
 wav_files = sorted(wav_dir.glob("NWF03_*.wav"))
 pattern = re.compile(r"\w+_(?P<sent_id>\d\d-\d\d)\.wav")
 wav_durs = dict()
@@ -38,7 +43,7 @@ with open("ieee_durations.yaml", "w") as fid:
     yaml.safe_dump(wav_durs, fid)
 
 # load the sentence texts (dict mapping sentence IDs to sentence texts)
-fname_sentences = "all_ieee_sentences.yaml"
+fname_sentences = stim_metadata_dir / "ieee_sentences.yaml"
 with open(fname_sentences) as fid:
     sentences = yaml.safe_load(fid)
 
