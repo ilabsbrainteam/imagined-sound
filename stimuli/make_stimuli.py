@@ -4,9 +4,24 @@ import subprocess
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from pprint import pprint
 
 import matplotlib.pyplot as plt
-import music21 as mm
+from music21.duration import Duration
+from music21.instrument import Piano
+from music21.key import Key
+from music21.lily.lilyObjects import (
+    LyScoreBlock,
+    LyStenoDuration,
+    LyTempoEvent,
+    LyTempoRange,
+)
+from music21.lily.translate import LilypondConverter
+from music21.meter import TimeSignature
+from music21.note import Note, Rest
+from music21.stream import Stream
+from music21.tempo import MetronomeMark
+from music21.tie import Tie
 import numpy as np
 import scipy.stats
 import yaml
@@ -15,11 +30,24 @@ from fitter import Fitter, get_common_distributions
 
 
 def is_lily_score(obj):
-    return isinstance(obj, mm.lily.lilyObjects.LyScoreBlock)
+    return isinstance(obj, LyScoreBlock)
 
 
 def n_beats(seq):
     return sum([x.quarterLength for x in seq])
+
+
+def insert_metronome_mark_into_score(score, tempo):
+    tempo_range = LyTempoRange(tempo)
+    steno = LyStenoDuration("4")
+    tempo_mark = LyTempoEvent(tempoRange=tempo_range, stenoDuration=steno)
+    score[
+        0
+    ].scoreBody.music.compositeMusic.contents.music.compositeMusic.contents.sequentialMusic.musicList.contents[
+        0
+    ].music.compositeMusic.contents.sequentialMusic.musicList.contents.insert(
+        2, tempo_mark
+    )
 
 
 def get_distribution(data):
@@ -94,42 +122,37 @@ keys = [
     *[f"{k}-" for k in "BEADGb"],  # flatted major (plus B♭ minor)
     *[f"{k}#" for k in "dgcf"],  # sharped minor
 ]
-keysigs = [mm.key.Key(key) for key in keys]
+keysigs = [Key(key) for key in keys]
 
 # time signatures
 _timesigs = ("2/4", "3/4", "4/4")
-timesigs = [mm.meter.TimeSignature(ts) for ts in _timesigs]
+timesigs = [TimeSignature(ts) for ts in _timesigs]
 
 # rhythms
-durs = {
-    dur: mm.duration.Duration(type=dur) for dur in ("16th", "eighth", "quarter", "half")
-}
+durs = {dur: Duration(type=dur) for dur in ("16th", "eighth", "quarter", "half")}
 durs.update(
-    {
-        f"dotted_{dur}": mm.duration.Duration(type=dur, dots=1)
-        for dur in ("eighth", "quarter")
-    }
+    {f"dotted_{dur}": Duration(type=dur, dots=1) for dur in ("eighth", "quarter")}
 )
 phrases = (
     # two-beat
     [durs["half"]],
     [durs[d] for d in ("quarter", "quarter")],
-    [durs[d] for d in ("quarter", "eighth", "eighth")],
     [durs[d] for d in ("eighth", "eighth", "quarter")],
-    [durs[d] for d in ("dotted_quarter", "eighth")],
     [durs[d] for d in ("eighth", "eighth", "eighth", "eighth")],
     [durs[d] for d in ("eighth", "dotted_quarter")],
     # one-beat
     [durs["quarter"]],
     [durs[d] for d in ("eighth", "eighth")],
-    [durs[d] for d in ("16th", "16th", "eighth")],
-    [durs[d] for d in ("16th", "dotted_eighth")],
+    # [durs[d] for d in ("16th", "16th", "eighth")],
+    # [durs[d] for d in ("16th", "dotted_eighth")],
 )
 nonfinal_phrases = (
+    [durs[d] for d in ("quarter", "eighth", "eighth")],
+    [durs[d] for d in ("dotted_quarter", "eighth")],
     # one-beat
-    [durs[d] for d in ("16th", "16th", "16th", "16th")],
-    [durs[d] for d in ("eighth", "16th", "16th")],
-    [durs[d] for d in ("dotted_eighth", "16th")],
+    # [durs[d] for d in ("16th", "16th", "16th", "16th")],
+    # [durs[d] for d in ("eighth", "16th", "16th")],
+    # [durs[d] for d in ("dotted_eighth", "16th")],
 )
 
 # containers
@@ -154,51 +177,79 @@ for file_ix in range(n_stims):
         this_pitches[-1] = rng.choice([pitches[0], pitches[-1]])
 
     # create rhythm
-    rhythm = list()
     melody = list()
     prev_was_rest = False  # we're guaranteed to get at least one note before first rest
+    timesig = rng.choice(timesigs)
+    this_measure = timesig.barDuration.quarterLength
+    print("=" * 60)
+    pprint(this_pitches.tolist())
     while this_n_notes > 0:
-        candidates = [ph for ph in phrases if len(ph) <= this_n_notes]
-        candidate_nonfinals = list(
-            filter(lambda ph: len(ph) < this_n_notes, nonfinal_phrases)
+        print(f"  {this_measure=}")
+        candidate_phrases = [ph for ph in phrases if len(ph) <= this_n_notes]
+        # also include nonfinal phrases that are strictly shorter than remaining n_notes
+        candidate_phrases.extend(
+            [ph for ph in nonfinal_phrases if len(ph) < this_n_notes]
         )
-        candidates.extend(candidate_nonfinals)
-        this_phrase = candidates[rng.choice(len(candidates))]
-        this_n_notes -= len(this_phrase)
-        rhythm.extend(this_phrase)
-        melody.extend(
-            [
-                mm.note.Note(pitch=pitch, duration=dur)
-                for pitch, dur in zip(this_pitches, this_phrase)
-            ]
-        )
-        this_pitches = this_pitches[len(this_phrase) :]
+        this_phrase = candidate_phrases[rng.choice(len(candidate_phrases))]
+        pprint(list(this_phrase), indent=4, width=50)
+        if n_beats(this_phrase) > this_measure:
+            for this_beat in this_phrase:
+                this_pitch = this_pitches[0]
+                this_pitches = this_pitches[1:]
+                if this_beat.quarterLength > this_measure:
+                    print(f"      {this_beat.quarterLength=}")
+                    pre = Note(pitch=this_pitch, duration=Duration(this_measure))
+                    post = Note(
+                        pitch=this_pitch,
+                        duration=Duration(this_beat.quarterLength - this_measure),
+                    )
+                    pre.tie = Tie("start")
+                    post.tie = Tie("stop")
+                    melody.extend([pre, post])
+                else:
+                    melody.append(Note(pitch=this_pitch, duration=this_beat))
+        else:
+            melody.extend(
+                [
+                    Note(pitch=pitch, duration=dur)
+                    for pitch, dur in zip(this_pitches, this_phrase)
+                ]
+            )
+            this_pitches = this_pitches[len(this_phrase) :]
         if (
             allow_rests
             and not prev_was_rest  # avoid 2 rests in a row
             and len(this_pitches)  # not the end of the melody
             and rng.choice((False, True), p=(1 - rest_prob, rest_prob))
         ):
-            rest_dur = rng.choice(("quarter", "eighth"))
-            rhythm.append(mm.duration.Duration(type=rest_dur))
-            melody.append(mm.note.Rest(type=rest_dur))
+            this_rest = Rest(type=rng.choice(("quarter", "eighth")))
+            melody.append(this_rest)
+            this_measure -= this_rest.quarterLength
             prev_was_rest = True
         else:
             prev_was_rest = False
-    assert len(rhythm) == len(melody)
-    assert n_beats(rhythm) == n_beats(melody)
+        this_n_notes -= len(this_phrase)
+        this_measure -= n_beats(this_phrase)
+        if this_measure <= 0:
+            this_measure += timesig.barDuration.quarterLength
+    assert all([beat.quarterLength > 0 for beat in melody])
 
     # set tempo
     this_duration = durations[file_ix]
-    beats_per_min = np.rint(n_beats(rhythm) / (this_duration / 60)).astype(int).item()
-    tempo = mm.tempo.MetronomeMark(
-        number=beats_per_min, referent=mm.note.Note(type="quarter")
-    )  # playbackOnly=True
-    tempo.placement = "above"
+    beats_per_min = np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
+    tempo = MetronomeMark(number=beats_per_min, referent=Note(type="quarter"))
 
     # initialize the stream
-    timesig = rng.choice(timesigs)
-    stream = mm.stream.Stream([keysig, timesig, tempo, *melody])
+    instrument = Piano()
+    for attr in (
+        "instrumentName",
+        "instrumentAbbreviation",
+        "partName",
+        "partAbbreviation",
+    ):
+        setattr(instrument, attr, f"{file_ix:03}")
+    stream = Stream([keysig, tempo, timesig, *melody])
+    stream.partName = f"{file_ix:03}"
 
     streams.append(stream)
     wav_path = wav_dir / f"{file_ix:03}.wav"
@@ -220,17 +271,38 @@ for file_ix in range(n_stims):
         timeout=10,
     )
     # append rest to yield full measure, as needed (for score only) TODO THIS IS BUGGY I THINK?
-    if missing_beats := (stream.quarterLength % timesig.barDuration.quarterLength):
-        stream.append(mm.note.Rest(missing_beats))
+    if partial_measure := (stream.quarterLength % timesig.barDuration.quarterLength):
+        stream.append(Rest(timesig.barDuration.quarterLength - partial_measure))
     # assemble all scores
-    converter = mm.lily.translate.LilypondConverter()
+    converter = LilypondConverter()
     converter.loadFromMusic21Object(stream)
-    scores.extend(list(filter(is_lily_score, converter.context.contents)))
+    # fixup the bug that music21 doesn't write metronome marks into the score
+    score = list(filter(is_lily_score, converter.context.contents))
+    assert len(score) == 1
+    insert_metronome_mark_into_score(score, beats_per_min)
+    scores.extend(score)
 
 # write scores to disk
 header = (score_dir / "scores-header.ly").read_text()
 scores_path = score_dir / f"scores_{today}.ly"
 scores_path.write_text("\n".join([header, *list(map(str, scores))]))
+
+# fixup: add stim names to score
+lines_in = scores_path.read_text().split("\n")
+lines_out = list()
+ix = 0
+for line in lines_in:
+    if "\\new Voice" in line:
+        line = line.replace(
+            "\\new Voice { \\new Voice",
+            f'\\new Staff \\with {{ instrumentName = "{ix:003}" }} {{ \\new Voice',
+        )
+        ix += 1
+    lines_out.append(line)
+assert ix == n_stims
+scores_path.write_text("\n".join(lines_out))
+
+
 subprocess.run(
     ["lilypond", "--pdf", f"--output={score_dir}/scores_{today}", str(scores_path)]
 )  # .pdf extension is automatically added
