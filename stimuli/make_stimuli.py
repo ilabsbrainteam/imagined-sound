@@ -4,7 +4,7 @@ import subprocess
 from collections import Counter
 from datetime import date
 from pathlib import Path
-from pprint import pprint
+# from pprint import pprint
 
 import matplotlib.pyplot as plt
 from music21.duration import Duration
@@ -181,23 +181,23 @@ for file_ix in range(n_stims):
     prev_was_rest = False  # we're guaranteed to get at least one note before first rest
     timesig = rng.choice(timesigs)
     this_measure = timesig.barDuration.quarterLength
-    print("=" * 60)
-    pprint(this_pitches.tolist())
+    # print("=" * 60)
+    # pprint(this_pitches.tolist())
     while this_n_notes > 0:
-        print(f"  {this_measure=}")
+        # print(f"  {this_measure=}")
         candidate_phrases = [ph for ph in phrases if len(ph) <= this_n_notes]
         # also include nonfinal phrases that are strictly shorter than remaining n_notes
         candidate_phrases.extend(
             [ph for ph in nonfinal_phrases if len(ph) < this_n_notes]
         )
         this_phrase = candidate_phrases[rng.choice(len(candidate_phrases))]
-        pprint(list(this_phrase), indent=4, width=50)
+        # pprint(list(this_phrase), indent=4, width=50)
         if n_beats(this_phrase) > this_measure:
             for this_beat in this_phrase:
                 this_pitch = this_pitches[0]
                 this_pitches = this_pitches[1:]
                 if this_beat.quarterLength > this_measure:
-                    print(f"      {this_beat.quarterLength=}")
+                    # print(f"      {this_beat.quarterLength=}")
                     pre = Note(pitch=this_pitch, duration=Duration(this_measure))
                     post = Note(
                         pitch=this_pitch,
