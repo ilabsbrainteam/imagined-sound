@@ -27,10 +27,10 @@ def count_syllables(sentence):
 # paths
 project_root = Path(__file__).parents[1]
 stim_metadata_dir = project_root / "stimuli" / "metadata"
-wav_dir = project_root / "experiment" / "stimuli" / "NWF003"
+wav_dir = project_root / "experiment" / "stimuli" / "NWF004"
 
 # get duration of audio files
-wav_files = sorted(wav_dir.glob("NWF03_*.wav"))
+wav_files = sorted(wav_dir.glob("NW[MF]0[0-9]_[0-9][0-9]-[0-9][0-9].wav"))
 pattern = re.compile(r"\w+_(?P<sent_id>\d\d-\d\d)\.wav")
 wav_durs = dict()
 for wav_file in wav_files:

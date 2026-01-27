@@ -57,7 +57,7 @@ for _dir in (wav_dir, score_dir):
 with open(project_root / "experiment" / "block_stims.yaml") as fid:
     speech_stims = yaml.safe_load(fid)
 speech_stim_ids = [
-    n.removeprefix("NWF03_").removesuffix(".wav")
+    n.removeprefix("NWF04_").removesuffix(".wav")
     for n in (*speech_stims["click_speech"], *speech_stims["imagine_speech"])
 ]
 
