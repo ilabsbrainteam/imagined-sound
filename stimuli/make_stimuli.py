@@ -57,11 +57,27 @@ def get_distribution(data):
     best = f_obj.get_best()  # s(hape), loc(ation), scale
     dist_name = list(best)[0]
     func = getattr(scipy.stats, dist_name)
-    return func(**best[dist_name])
+    frozen_dist = func(**best[dist_name])
+    # set a hard lower limit on duration (truncate the best-fit distribution)
+
+    def trunc_dist(**kwargs):
+        # uniformly-distributed RVs in [0,1]
+        rvs = scipy.stats.uniform.rvs(**kwargs)
+        # equation for truncating a distr: https://stats.stackexchange.com/a/534340
+        return frozen_dist.ppf(
+            rvs * (frozen_dist.cdf(max_duration) - frozen_dist.cdf(min_duration))
+            + frozen_dist.cdf(min_duration)
+        )
+
+    frozen_dist.rvs = trunc_dist
+    frozen_dist.dist.name += f" (truncated to [{min_duration}, {max_duration}])"
+    return frozen_dist
 
 
 # tweakable params
 n_stims = 20
+min_duration = 1.5  # seconds
+max_duration = np.inf
 end_on_tonic = True
 pentatonic = True
 allow_rests = True
