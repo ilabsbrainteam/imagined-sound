@@ -78,6 +78,7 @@ def get_distribution(data):
 n_stims = 20
 min_duration = 1.5  # seconds
 max_duration = np.inf
+max_n_notes = 10
 end_on_tonic = True
 pentatonic = True
 allow_rests = True
@@ -126,7 +127,9 @@ with open(stim_metadata_dir / "ieee_n_syllables.yaml") as fid:
     speech_syllables = yaml.safe_load(fid)
 n_syls = list(speech_syllables.values())
 syl_distribution = dict(sorted(Counter(n_syls).items()))
-n_notes = rng.choice(n_syls, size=n_stims, replace=True)
+# discard the highest number of syllables, else we get melodies that are too fast
+note_distr = list(filter(lambda x: x <= max_n_notes, n_syls))
+n_notes = rng.choice(note_distr, size=n_stims, replace=True)
 # write to file the distribution was that we used
 with open(stim_metadata_dir / "stim_nsyll_distribution.yaml", "w") as fid:
     yaml.safe_dump(dict(syl_distribution), fid)
