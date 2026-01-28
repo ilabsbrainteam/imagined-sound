@@ -249,7 +249,7 @@ for file_ix in range(n_stims):
             prev_was_rest = False
         this_n_notes -= len(this_phrase)
         this_measure -= n_beats(this_phrase)
-        if this_measure <= 0:
+        while this_measure <= 0:
             this_measure += timesig.barDuration.quarterLength
     assert all([beat.quarterLength > 0 for beat in melody])
 
