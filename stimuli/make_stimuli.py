@@ -223,30 +223,14 @@ for file_ix in range(n_stims):
         )
         this_phrase = candidate_phrases[rng.choice(len(candidate_phrases))]
         logger.debug(pformat(list(this_phrase), indent=4, width=50))
-        if n_beats(this_phrase) > this_measure:
-            for this_beat in this_phrase:
-                this_pitch = this_pitches[0]
-                this_pitches = this_pitches[1:]
-                if this_beat.quarterLength > this_measure:
-                    logger.debug(f"      {this_beat.quarterLength=}")
-                    pre = Note(pitch=this_pitch, duration=Duration(this_measure))
-                    post = Note(
-                        pitch=this_pitch,
-                        duration=Duration(this_beat.quarterLength - this_measure),
-                    )
-                    pre.tie = Tie("start")
-                    post.tie = Tie("stop")
-                    melody.extend([pre, post])
-                else:
-                    melody.append(Note(pitch=this_pitch, duration=this_beat))
-        else:
-            melody.extend(
-                [
-                    Note(pitch=pitch, duration=dur)
-                    for pitch, dur in zip(this_pitches, this_phrase)
-                ]
-            )
-            this_pitches = this_pitches[len(this_phrase) :]
+        # first, assemble the melody and don't worry about measures / ties
+        melody.extend(
+            [
+                Note(pitch=pitch, duration=dur)
+                for pitch, dur in zip(this_pitches, this_phrase)
+            ]
+        )
+        this_pitches = this_pitches[len(this_phrase) :]
         if (
             allow_rests
             and not prev_was_rest  # avoid 2 rests in a row
@@ -265,8 +249,7 @@ for file_ix in range(n_stims):
         while this_measure <= 0:
             this_measure += timesig.barDuration.quarterLength
     assert all([beat.quarterLength > 0 for beat in melody])
-
-    # set tempo
+    # now, set tempo (and potentially adjust note lengths)
     this_duration = durations[file_ix]
     beats_per_min = np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
     # adjust note duration if tempo is too fast
@@ -279,6 +262,30 @@ for file_ix in range(n_stims):
             np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
         )
     tempo = MetronomeMark(number=beats_per_min, referent=Note(type="quarter"))
+    # now split notes and add ties as needed
+    this_measure = timesig.barDuration.quarterLength
+    melody_out = list()
+    for item in melody:
+        if n_beats([item]) <= this_measure:
+            melody_out.append(item)
+        else:
+            if item.isRest:
+                pre = Rest(duration=Duration(this_measure))
+                post = Rest(duration=Duration(item.quarterLength - this_measure))
+            else:
+                pre = Note(pitch=item.pitch, duration=Duration(this_measure))
+                post = Note(
+                    pitch=item.pitch,
+                    duration=Duration(item.quarterLength - this_measure),
+                )
+                pre.tie = Tie("start")
+                post.tie = Tie("stop")
+            assert item.quarterLength == pre.quarterLength + post.quarterLength
+            melody_out.extend([pre, post])
+        this_measure -= item.quarterLength
+        while this_measure <= 0:
+            this_measure += timesig.barDuration.quarterLength
+    melody = melody_out
 
     # initialize the stream
     stream = Stream([keysig, tempo, timesig, *melody])
