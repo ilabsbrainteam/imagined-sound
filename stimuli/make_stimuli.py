@@ -2,6 +2,7 @@
 import subprocess
 
 from collections import Counter
+from copy import deepcopy
 from datetime import date
 from pathlib import Path
 # from pprint import pprint
@@ -174,6 +175,15 @@ nonfinal_phrases = (
     # [durs[d] for d in ("dotted_eighth", "16th")],
 )
 
+# mapping to half-length (for tempo adjustments)
+half_lengths = {
+    "32nd": 0.0625,
+    "16th": 0.125,
+    "eighth": 0.25,
+    "quarter": 0.5,
+    "half": 1.0,
+}
+
 # containers
 streams = list()
 scores = list()
@@ -256,6 +266,15 @@ for file_ix in range(n_stims):
     # set tempo
     this_duration = durations[file_ix]
     beats_per_min = np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
+    # adjust note duration if tempo is too fast
+    if beats_per_min > 200:
+        retempoed = deepcopy(melody)
+        for ix, item in enumerate(melody):
+            retempoed[ix].quarterLength = half_lengths[item.duration.type]
+        melody = retempoed
+        beats_per_min = (
+            np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
+        )
     tempo = MetronomeMark(number=beats_per_min, referent=Note(type="quarter"))
 
     # initialize the stream
