@@ -82,7 +82,7 @@ max_n_notes = 10
 end_on_tonic = True
 pentatonic = True
 allow_rests = True
-rest_prob = 0.3
+rest_prob = 0.2
 seed = 8675309
 
 # states
@@ -289,7 +289,7 @@ for file_ix in range(n_stims):
         check=True,
         timeout=10,
     )
-    # append rest to yield full measure, as needed (for score only) TODO THIS IS BUGGY I THINK?
+    # append rest to yield full measure, as needed (for score only)
     if partial_measure := (stream.quarterLength % timesig.barDuration.quarterLength):
         stream.append(Rest(timesig.barDuration.quarterLength - partial_measure))
     # assemble all scores
