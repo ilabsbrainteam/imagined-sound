@@ -187,12 +187,13 @@ half_lengths = {
 }
 
 # containers
-streams = list()
 scores = list()
+stim_ixs = list()
+skipped = list()
 
-for file_ix in range(n_stims):
+for stim_ix in range(n_stims):
     # choose the pitches
-    this_n_notes = n_notes[file_ix]
+    this_n_notes = n_notes[stim_ix]
     keysig = rng.choice(keysigs)
     if not pentatonic:
         selection = slice(None)
@@ -250,13 +251,13 @@ for file_ix in range(n_stims):
             this_measure += timesig.barDuration.quarterLength
     assert all([beat.quarterLength > 0 for beat in melody])
     # now, set tempo (and potentially adjust note lengths)
-    this_duration = durations[file_ix]
+    this_duration = durations[stim_ix]
     beats_per_min = np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
     # adjust note duration if tempo is too fast
     if beats_per_min > 200:
         retempoed = deepcopy(melody)
-        for ix, item in enumerate(melody):
-            retempoed[ix].quarterLength = half_lengths[item.duration.type]
+        for note_ix, item in enumerate(melody):
+            retempoed[note_ix].quarterLength = half_lengths[item.duration.type]
         melody = retempoed
         beats_per_min = (
             np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
@@ -289,7 +290,7 @@ for file_ix in range(n_stims):
 
     # initialize the stream
     stream = Stream([keysig, tempo, timesig, *melody])
-    wav_path = wav_dir / f"{file_ix:03}.wav"
+    wav_path = wav_dir / f"{stim_ix:03}.wav"
     # write to (temporary MIDI file, then to) WAV
     midi_path = stream.write(fmt="midi")  # fp=path/to/midi → save elsewhere than /tmp/
     subprocess.run(
