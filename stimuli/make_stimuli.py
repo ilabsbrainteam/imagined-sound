@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import logging
 import subprocess
-
 from collections import Counter
 from copy import deepcopy
 from datetime import date
@@ -367,10 +366,16 @@ scores_path.write_text("\n".join(lines_out))
 # compile scores to PDF
 logger.info(separator)
 logger.info("Compiling PDF of scores")
-subprocess.run(
-    ["lilypond", "--pdf", f"--output={score_dir}/scores_{today}", str(scores_path)]
-)  # .pdf extension is automatically added
-
+with open(stim_metadata_dir / "lilypond-compilation.log", "w") as f:
+    subprocess.run(
+        [
+            "lilypond",
+            "--pdf",
+            f"--output={score_dir}/scores_{today}",  # `.pdf` automatically added
+            str(scores_path),
+        ],
+        stderr=f,
+    )
 
 # plot stimulus properties
 fig, axs = plt.subplots(1, 2, layout="constrained")
