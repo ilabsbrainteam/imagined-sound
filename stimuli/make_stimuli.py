@@ -78,7 +78,7 @@ def get_distribution(data):
 
 
 # tweakable params
-n_stims = 20
+n_stims = 320
 min_duration = 1.5  # seconds
 max_duration = np.inf
 max_n_notes = 10
