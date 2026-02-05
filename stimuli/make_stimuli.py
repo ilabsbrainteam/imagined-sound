@@ -86,6 +86,7 @@ end_on_tonic = True
 pentatonic = True
 allow_rests = True
 rest_prob = 0.2
+max_bpm_with_16ths = 135
 seed = 8675309
 
 # states
@@ -263,6 +264,13 @@ for stim_ix in range(n_stims):
             np.rint(n_beats(melody) / (this_duration / 60)).astype(int).item()
         )
     tempo = MetronomeMark(number=beats_per_min, referent=Note(type="quarter"))
+    # discard anything that's still faster than 150BPM and has sixteenth notes
+    if beats_per_min > max_bpm_with_16ths and any(
+        [x.duration.fullName == "16th" for x in melody]
+    ):
+        skipped.append(f"{stim_ix:03}")
+        continue
+    stim_ixs.append(stim_ix)
     # now split notes and add ties as needed
     this_measure = timesig.barDuration.quarterLength
     melody_out = list()
@@ -319,6 +327,13 @@ for stim_ix in range(n_stims):
     insert_metronome_mark_into_score(score, beats_per_min)
     scores.extend(score)
 
+assert len(stim_ixs) == n_stims - len(skipped)
+if len(skipped):
+    logger.warning(
+        f"skipped {len(skipped)} stims for being too fast; {len(stim_ixs)} will be "
+        f"written to disk ({len(stim_ixs) / n_stims:.0%} of requested {n_stims})"
+    )
+
 # write scores to disk
 header = (score_dir / "scores-header.ly").read_text()
 scores_path = score_dir / f"scores_{today}.ly"
@@ -327,16 +342,13 @@ scores_path.write_text("\n".join([header, *list(map(str, scores))]))
 # fixup: add stim names to score
 lines_in = scores_path.read_text().split("\n")
 lines_out = list()
-ix = 0
 for line in lines_in:
     if "\\new Voice" in line:
         line = line.replace(
             "\\new Voice { \\new Voice",
-            f'\\new Staff \\with {{ instrumentName = "{ix:003}" }} {{ \\new Voice',
+            f'\\new Staff \\with {{ instrumentName = "{stim_ixs.pop(0):03}" }} {{ \\new Voice',
         )
-        ix += 1
     lines_out.append(line)
-assert ix == n_stims
 scores_path.write_text("\n".join(lines_out))
 
 
