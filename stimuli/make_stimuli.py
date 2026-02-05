@@ -9,6 +9,10 @@ from pprint import pformat
 from shutil import copytree, rmtree
 
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy.stats
+import yaml
+from fitter import Fitter, get_common_distributions
 from music21.duration import Duration
 from music21.key import Key
 from music21.lily.lilyObjects import (
@@ -23,11 +27,6 @@ from music21.note import Note, Rest
 from music21.stream import Stream
 from music21.tempo import MetronomeMark
 from music21.tie import Tie
-import numpy as np
-import scipy.stats
-import yaml
-
-from fitter import Fitter, get_common_distributions
 
 logger = logging.Logger("prism")
 logger.setLevel(logging.INFO)
