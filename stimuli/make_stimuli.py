@@ -28,7 +28,8 @@ from music21.stream import Stream
 from music21.tempo import MetronomeMark
 from music21.tie import Tie
 
-logger = logging.Logger("prism")
+logging.basicConfig(format="{name}:{levelname}: {message}", style="{")
+logger = logging.getLogger("prism")
 logger.setLevel(logging.INFO)
 separator = "-" * 60
 
@@ -194,6 +195,8 @@ scores = list()
 stim_ixs = list()
 skipped = list()
 
+logger.info(separator)
+logger.info("Starting stimulus generation")
 for stim_ix in range(n_stims):
     # choose the pitches
     this_n_notes = n_notes[stim_ix]
@@ -333,7 +336,7 @@ assert len(stim_ixs) == n_stims - len(skipped)
 if len(skipped):
     logger.info(separator)
     logger.info(
-        f"skipped {len(skipped)} stims for being too fast; {len(stim_ixs)} will be "
+        f"Skipped {len(skipped)} stims for being too fast; {len(stim_ixs)} will be "
         f"written to disk ({len(stim_ixs) / n_stims:.0%} of requested {n_stims})"
     )
 
