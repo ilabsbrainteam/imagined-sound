@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import subprocess
-from collections import Counter
+from collections import Counter, defaultdict
 from copy import deepcopy
 from datetime import date
 from pathlib import Path
@@ -42,6 +42,10 @@ def n_beats(seq):
     return sum([x.quarterLength for x in seq])
 
 
+def which_are_notes(seq):
+    return list(map(lambda x: not x.isRest, seq))
+
+
 def insert_metronome_mark_into_score(score, tempo):
     tempo_range = LyTempoRange(tempo)
     steno = LyStenoDuration("4")
@@ -52,6 +56,23 @@ def insert_metronome_mark_into_score(score, tempo):
         0
     ].music.compositeMusic.contents.sequentialMusic.musicList.contents.insert(
         2, tempo_mark
+    )
+
+
+def midi_to_wav(midi_path, wav_path):
+    subprocess.run(
+        [
+            "timidity",
+            "--quiet=2",
+            # append ↓ 8,1,2: 8,16,24-bits, u/s: (un)signed, l(inear), M(ono)/S(tereo)
+            "--output-mode=w",
+            f"--output-file={wav_path}",
+            str(midi_path),
+            "-EFreverb=0",
+            "--sampling-freq=44100",
+        ],
+        check=True,
+        timeout=10,
     )
 
 
@@ -89,6 +110,7 @@ pentatonic = True
 allow_rests = True
 rest_prob = 0.2
 max_bpm_with_16ths = 135
+n_notes_in_test_stims = 3
 seed = 8675309
 
 # states
@@ -101,8 +123,10 @@ stim_metadata_dir = project_root / "stimuli" / "metadata"
 score_dir = project_root / "stimuli" / "scores"
 stim_dir = project_root / "experiment" / "stimuli" / "music"
 wav_dir = project_root / "stimuli" / "music" / today
+test_wav_dir = project_root / "stimuli" / "test_music" / today
+test_stim_dir = project_root / "experiment" / "stimuli" / "test_music"
 # log_dir = project_root / "logs" / "stimgen"
-for _dir in (wav_dir, score_dir):
+for _dir in (score_dir, wav_dir, test_wav_dir, test_stim_dir):
     _dir.mkdir(exist_ok=True)
 
 # get the sentence IDs for the speech stims actually used in the experiment
@@ -193,7 +217,7 @@ half_lengths = {
 # containers
 scores = list()
 stim_ixs = list()
-skipped = list()
+skipped = defaultdict(list)
 
 logger.info(separator)
 logger.info("Starting stimulus generation")
@@ -273,9 +297,8 @@ for stim_ix in range(n_stims):
     if beats_per_min > max_bpm_with_16ths and any(
         [x.duration.fullName == "16th" for x in melody]
     ):
-        skipped.append(f"{stim_ix:03}")
+        skipped["too fast"].append(f"{stim_ix:03}")
         continue
-    stim_ixs.append(stim_ix)
     # now split notes and add ties as needed
     this_measure = timesig.barDuration.quarterLength
     melody_out = list()
@@ -302,23 +325,40 @@ for stim_ix in range(n_stims):
 
     # initialize the stream
     stream = Stream([keysig, tempo, timesig, *melody])
-    wav_path = wav_dir / f"{stim_ix:03}.wav"
-    # write to (temporary MIDI file, then to) WAV
+    # extract a "test" passage for each stim
+    test_candidates = list()
+    note_indices = np.flatnonzero(which_are_notes(melody))
+    for ix, start_ix in enumerate(note_indices[: -n_notes_in_test_stims + 1]):
+        # the -1 +1 below is not a bug
+        end_ix = note_indices[ix + n_notes_in_test_stims - 1] + 1
+        this_candidate = melody[start_ix:end_ix]
+        assert sum(which_are_notes(this_candidate)) == n_notes_in_test_stims
+        note_names = np.array(
+            [
+                note.pitch.nameWithOctave
+                for note in filter(lambda x: not x.isRest, this_candidate)
+            ]
+        )
+        # in test stims, disallow adjacent notes that are the same
+        if not any(note_names[:-1] == note_names[1:]):
+            test_candidates.append(this_candidate)
+    # skip stims where there's no viable test stim
+    if not len(test_candidates):
+        skipped["no viable test stim"].append(f"{stim_ix:03}")
+        continue
+    # ragged array workaround     ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+    test_melody = test_candidates[rng.choice(len(test_candidates))]
+
+    # bookkeeping (if we've made it this far, the stim will be saved to disk)
+    stim_ixs.append(stim_ix)
+    # write stream to (temporary MIDI file, then to) WAV
     midi_path = stream.write(fmt="midi")  # fp=path/to/midi → save elsewhere than /tmp/
-    subprocess.run(
-        [
-            "timidity",
-            "--quiet=2",
-            # append ↓ 8,1,2: 8,16,24-bits, u/s: (un)signed, l(inear), M(ono)/S(tereo)
-            "--output-mode=w",
-            f"--output-file={wav_path}",
-            str(midi_path),
-            "-EFreverb=0",
-            "--sampling-freq=44100",
-        ],
-        check=True,
-        timeout=10,
-    )
+    wav_path = wav_dir / f"{stim_ix:03}.wav"
+    midi_to_wav(midi_path, wav_path)
+    # also write test stim to (temporary MIDI file, then to) WAV
+    midi_path = Stream([keysig, tempo, timesig, *test_melody]).write(fmt="midi")
+    wav_path = test_wav_dir / f"{stim_ix:03}.wav"
+    midi_to_wav(midi_path, wav_path)
 
     # append rest(s) to yield full measure, as needed (for score only)
     if partial_measure := (stream.quarterLength % timesig.barDuration.quarterLength):
@@ -332,12 +372,14 @@ for stim_ix in range(n_stims):
     insert_metronome_mark_into_score(score, beats_per_min)
     scores.extend(score)
 
-assert len(stim_ixs) == n_stims - len(skipped)
+assert len(stim_ixs) == n_stims - len([y for x in skipped.values() for y in x])
 if len(skipped):
     logger.info(separator)
+    for key, val in skipped.items():
+        logger.info(f"Skipped {len(val)} stims (reason: {key})")
     logger.info(
-        f"Skipped {len(skipped)} stims for being too fast; {len(stim_ixs)} will be "
-        f"written to disk ({len(stim_ixs) / n_stims:.0%} of requested {n_stims})"
+        f"{len(stim_ixs)} stims will be written to disk "
+        f"({len(stim_ixs) / n_stims:.0%} of requested {n_stims})"
     )
 
 # copy WAV files to proper directory
@@ -345,6 +387,9 @@ logger.info(separator)
 logger.info("Copying stimulus files to experiment folder")
 rmtree(stim_dir)
 copytree(wav_dir, stim_dir)
+# also the test stims
+rmtree(test_stim_dir)
+copytree(test_wav_dir, test_stim_dir)
 
 # write scores to disk
 logger.info(separator)
