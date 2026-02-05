@@ -1,10 +1,10 @@
 #!/usr/bin/env python
+import logging
 import subprocess
 
 from collections import Counter
 from copy import deepcopy
 from datetime import date
-from logging import Logger
 from pathlib import Path
 from pprint import pformat
 from shutil import copytree, rmtree
@@ -30,7 +30,8 @@ import yaml
 
 from fitter import Fitter, get_common_distributions
 
-logger = Logger("prism")
+logger = logging.Logger("prism")
+logger.setLevel(logging.INFO)
 separator = "-" * 60
 
 
