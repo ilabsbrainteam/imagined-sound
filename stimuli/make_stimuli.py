@@ -7,6 +7,7 @@ from datetime import date
 from logging import Logger
 from pathlib import Path
 from pprint import pformat
+from shutil import copytree, rmtree
 
 import matplotlib.pyplot as plt
 from music21.duration import Duration
@@ -30,6 +31,7 @@ import yaml
 from fitter import Fitter, get_common_distributions
 
 logger = Logger("prism")
+separator = "-" * 60
 
 
 def is_lily_score(obj):
@@ -97,7 +99,8 @@ today = date.today().isoformat()
 project_root = Path(__file__).resolve().parents[1]
 stim_metadata_dir = project_root / "stimuli" / "metadata"
 score_dir = project_root / "stimuli" / "scores"
-wav_dir = project_root / "experiment" / "stimuli" / f"music_{today}"
+stim_dir = project_root / "experiment" / "stimuli" / "music"
+wav_dir = project_root / "stimuli" / "music" / today
 # log_dir = project_root / "logs" / "stimgen"
 for _dir in (wav_dir, score_dir):
     _dir.mkdir(exist_ok=True)
@@ -214,7 +217,7 @@ for stim_ix in range(n_stims):
     prev_was_rest = False  # we're guaranteed to get at least one note before first rest
     timesig = rng.choice(timesigs)
     this_measure = timesig.barDuration.quarterLength
-    logger.debug("=" * 60)
+    logger.debug(separator)
     logger.debug(pformat(this_pitches.tolist()))
     while this_n_notes > 0:
         logger.debug(f"  {this_measure=}")
@@ -329,12 +332,21 @@ for stim_ix in range(n_stims):
 
 assert len(stim_ixs) == n_stims - len(skipped)
 if len(skipped):
-    logger.warning(
+    logger.info(separator)
+    logger.info(
         f"skipped {len(skipped)} stims for being too fast; {len(stim_ixs)} will be "
         f"written to disk ({len(stim_ixs) / n_stims:.0%} of requested {n_stims})"
     )
 
+# copy WAV files to proper directory
+logger.info(separator)
+logger.info("Copying stimulus files to experiment folder")
+rmtree(stim_dir)
+copytree(wav_dir, stim_dir)
+
 # write scores to disk
+logger.info(separator)
+logger.info("Saving LilyPond score")
 header = (score_dir / "scores-header.ly").read_text()
 scores_path = score_dir / f"scores_{today}.ly"
 scores_path.write_text("\n".join([header, *list(map(str, scores))]))
@@ -351,7 +363,9 @@ for line in lines_in:
     lines_out.append(line)
 scores_path.write_text("\n".join(lines_out))
 
-
+# compile scores to PDF
+logger.info(separator)
+logger.info("Compiling PDF of scores")
 subprocess.run(
     ["lilypond", "--pdf", f"--output={score_dir}/scores_{today}", str(scores_path)]
 )  # .pdf extension is automatically added
