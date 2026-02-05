@@ -283,15 +283,14 @@ for stim_ix in range(n_stims):
         if n_beats([item]) <= this_measure:
             melody_out.append(item)
         else:
+            pre_dur = Duration(this_measure)
+            post_dur = Duration(item.quarterLength - this_measure)
             if item.isRest:
-                pre = Rest(duration=Duration(this_measure))
-                post = Rest(duration=Duration(item.quarterLength - this_measure))
+                pre = Rest(duration=pre_dur)
+                post = Rest(duration=post_dur)
             else:
-                pre = Note(pitch=item.pitch, duration=Duration(this_measure))
-                post = Note(
-                    pitch=item.pitch,
-                    duration=Duration(item.quarterLength - this_measure),
-                )
+                pre = Note(pitch=item.pitch, duration=pre_dur)
+                post = Note(pitch=item.pitch, duration=post_dur)
                 pre.tie = Tie("start")
                 post.tie = Tie("stop")
             assert item.quarterLength == pre.quarterLength + post.quarterLength
@@ -320,7 +319,8 @@ for stim_ix in range(n_stims):
         check=True,
         timeout=10,
     )
-    # append rest to yield full measure, as needed (for score only)
+
+    # append rest(s) to yield full measure, as needed (for score only)
     if partial_measure := (stream.quarterLength % timesig.barDuration.quarterLength):
         stream.append(Rest(timesig.barDuration.quarterLength - partial_measure))
     # assemble all scores
