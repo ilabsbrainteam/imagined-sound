@@ -10,7 +10,6 @@ from pprint import pformat
 
 import matplotlib.pyplot as plt
 from music21.duration import Duration
-from music21.instrument import Piano
 from music21.key import Key
 from music21.lily.lilyObjects import (
     LyScoreBlock,
@@ -289,18 +288,7 @@ for file_ix in range(n_stims):
     melody = melody_out
 
     # initialize the stream
-    instrument = Piano()
-    for attr in (
-        "instrumentName",
-        "instrumentAbbreviation",
-        "partName",
-        "partAbbreviation",
-    ):
-        setattr(instrument, attr, f"{file_ix:03}")
     stream = Stream([keysig, tempo, timesig, *melody])
-    stream.partName = f"{file_ix:03}"
-
-    streams.append(stream)
     wav_path = wav_dir / f"{file_ix:03}.wav"
     # write to (temporary MIDI file, then to) WAV
     midi_path = stream.write(fmt="midi")  # fp=path/to/midi → save elsewhere than /tmp/
@@ -314,7 +302,6 @@ for file_ix in range(n_stims):
             str(midi_path),
             "-EFreverb=0",
             "--sampling-freq=44100",
-            # "--adjust-tempo=100",  # percent
         ],
         check=True,
         timeout=10,
