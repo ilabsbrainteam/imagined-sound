@@ -1,3 +1,13 @@
+# dirs
+experiment/logs/
+experiment/stimuli/
+notes/
+old/
+stimuli/metadata/
+stimuli/scores/
+stimuli/music/
+stimuli/test_music/
+
 # pixi environments
 .pixi/*
 !.pixi/config.toml
