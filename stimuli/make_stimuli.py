@@ -65,7 +65,7 @@ def midi_to_wav(midi_path, wav_path):
             "timidity",
             "--quiet=2",
             # append ↓ 8,1,2: 8,16,24-bits, u/s: (un)signed, l(inear), M(ono)/S(tereo)
-            "--output-mode=w",
+            "--output-mode=wM",
             f"--output-file={wav_path}",
             str(midi_path),
             "-EFreverb=0",
