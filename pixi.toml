@@ -18,7 +18,7 @@ stimuli = ["stimuli"]
 [feature.experiment]
 platforms = ["linux-64", "win-64"]
 dependencies = { ffmpeg = "<8", scp = "*" }
-pypi-dependencies = { expyfun = {git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"]}, rtmixer = {git = "https://github.com/spatialaudio/python-rtmixer.git", rev="c9ba6e4"}, setuptools = ">=70.1" }
+pypi-dependencies = { expyfun = {git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"]}, rtmixer = "*" }
 
 [feature.experiment.tasks]
 experiment = {cmd = "python run_experiment.py", cwd = "experiment"}
