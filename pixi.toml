@@ -26,7 +26,8 @@ getstims = {cmd = "scp -r kasga:/data06/dan/stimuli .", cwd = "experiment"}
 rsyncstims = {cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment"}
 
 [feature.analysis]
-pypi-dependencies = { mne-bids-pipeline = {path = "/opt/mne/pipeline", editable = true} }
+#pypi-dependencies = { mne-bids-pipeline = {path = "/opt/mne/pipeline", editable = true} }
+pypi-dependencies = { mne-bids-pipeline = {git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "0eff5f1"} }
 
 [feature.analysis.tasks]
 bidsify = {cmd = "python bidsify.py", cwd = "analysis"}
