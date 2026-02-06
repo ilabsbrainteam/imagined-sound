@@ -8,25 +8,24 @@ from pathlib import Path
 
 import numpy as np
 
-from expyfun import ExperimentController
+from expyfun import ExperimentController, decimals_to_binary
 from expyfun.stimuli import read_wav, rms
 from expyfun.visual import FixationDot
 
 # are we running in the MSR at the MEG center, or piloting elsewhere?
 msr = True
-yes = 1 if msr else "y"
-no = 2 if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
+yes = "1" if msr else "y"
+no = "2" if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
-pilot = "music"  # music or speech
 
 # paths
 project_root = Path(__file__).parents[1]
 stim_metadata_dir = project_root / "stimuli" / "metadata"
-stim_file_dir = Path(__file__) / "stimuli"
+stim_file_dir = Path(__file__).parent / "stimuli"
 
 # set timing parameters
 block_start_delay = 0.5
-feedback_dur = 0.5
+feedback_dur = 0.6
 inter_trial_interval = 1.0
 n_practice = 5
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
@@ -62,16 +61,34 @@ colors = {k: tuple(map(lambda x: x / 255, v)) for k, v in colors.items()}
 always = dict(font_name="DejaVu Sans", wrap=False)
 correct = dict(text="✔", color="w", **always)
 incorrect = dict(text="✘", color="k", **always)
+click_cue = dict(text="🖱️", color="w", **always)
+imagine_cue = dict(text="💭", color="w", **always)
+
+# trigger map
+trial_ids = dict(
+    real=0,
+    practice=1,
+    speech=0,
+    music=2,
+    click=4,
+    imagine=8,
+    stim_stop=12,
+    response_start=13,
+    response_end=14,
+)
+# real speech click → 4
+# real speech imag  → 8
+# real music click  → 6
+# real music imag   → 10
+# prac speech click → 5
+# prac speech imag  → 9
+# prac music click  → 7
+# prac music imag   → 11
+#
+# 2, 3, 15 available for other uses
 
 # needed for behavioral check (to look up keywords)
 attn_pattern = re.compile(r"NW[FM]0\d_(?P<sent_id>\d\d-\d\d).wav")
-
-# triage type of pilot experiment
-stim_repetitions = 1
-stim_folder = "NWF003"
-if pilot == "music":
-    stim_repetitions = 6
-    stim_folder = "pilot-melodies"
 
 # gather up all the bits that differ between blocks
 blocks = {
@@ -79,23 +96,20 @@ blocks = {
     for k, v in prompts.items()
     if k != "welcome" and not k.endswith("practice")
 }
+# add in the practice instructions
 _ = [
     blocks[k.removesuffix("_practice")].update(practice=v)
     for k, v in prompts.items()
     if k.endswith("practice")
 ]
-_ = [
-    blocks[k].update(stims=v * stim_repetitions)
-    for k, v in block_stims.items()
-    if k in blocks
-]
-if pilot == "music":
-    blocks = {key: val for key, val in blocks.items() if not key.endswith("speech")}
+# add the stimulus lists to each block
+_ = [blocks[k].update(stims=v) for k, v in block_stims.items() if k in blocks]
+
+# operator instructions
+print("Enter session=1 for speech first, session=2 for music first")
 
 # edit stim_db as needed for MEG Center
-sub_ses = (
-    dict(stim_db=80) if msr else dict(participant="foo", session="999", stim_db=65)
-)
+sub_ses = dict(stim_db=80) if msr else dict(participant="foo", session="1", stim_db=65)
 with ExperimentController(
     "prism",
     stim_fs=44100,
@@ -105,6 +119,15 @@ with ExperimentController(
     version="dev",
     **sub_ses,
 ) as ec:
+    if ec.session == "1":
+        block_order = ["click_speech", "click_music", "imagine_speech", "imagine_music"]
+        stim_folder = "speech"
+    elif ec.session == "2":
+        block_order = ["click_music", "click_speech", "imagine_music", "imagine_speech"]
+        stim_folder = "music"
+    else:
+        raise ValueError(f"bad session, expected 1 or 2, got {ec.session}")
+
     # we'll need this later
     dot = FixationDot(ec)
     radius = dot._circles[0]._radius
@@ -113,7 +136,18 @@ with ExperimentController(
     ec.screen_prompt(prompts["welcome"].format(resp=resp))
 
     # loop over blocks
-    for block_name, block in blocks.items():
+    for block_name in block_order:
+        block = blocks[block_name]
+
+        # pre-select attention-check trials
+        test_trial_indices = np.arange(2, len(block["stims"]) + 1, 4)  # every 4th trial
+        test_trial_jitter = rng.choice([-1, 0, 1], size=len(test_trial_indices))
+        test_trial_jitter[::2] = 0  # only (maybe) jitter every-other trial
+        test_trial_indices += test_trial_jitter
+        test_trials = np.array(block["stims"])[test_trial_indices]
+        non_test_trials = sorted(set(block["stims"]) - set(test_trials.tolist()))
+
+        # initial instructions
         ec.screen_prompt(block["prompt"] + paktc)
         ec.screen_prompt(
             f"First let's do {n_practice} practice trials (with feedback). "
@@ -127,16 +161,29 @@ with ExperimentController(
             data, fs = read_wav(stim_file_dir / stim_folder / stim_fname)
             assert fs == 44100, "bad stimulus sampling frequency"
             rms_data = 0.01 * data / rms(data)
+
+            # identify the trial
+            is_real = "practice" if practice else "real"
+            is_click = "click" if block_name.startswith("click") else "imagine"
+            is_music = "music" if block_name.endswith("music") else "speech"
+            trial_id = decimals_to_binary(
+                [sum([trial_ids[n] for n in (is_real, is_music, is_click)])], [4]
+            )
+            ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=trial_id)
+
+            # bugfix: stimuli are twice as long as they should be
+            if is_music == "music":
+                rms_data = rms_data[..., : rms_data.shape[-1] // 2]
+
             ec.load_buffer(rms_data)
             stim_duration = rms_data.shape[-1] / fs
             dot.draw()
 
             # start the trial
-            ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=[0, 0])  # 4, 4 = ID trial
             t_stim_start = ec.start_stimulus()  # sends a 1-trigger; "sentence start"
             ec.wait_secs(stim_duration)
             ec.stop()
-            ec.stamp_triggers([4, 8], wait_for_last=False)  # 4, 8 = audio over
+            ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
 
             # larger, colored fixation dot during response period
             # (won't actually appear until `dot.draw()` and `ec.flip()`)
@@ -186,10 +233,14 @@ with ExperimentController(
                 dot.draw()
                 # response period
                 t_response_start = ec.flip()
-                ec.stamp_triggers([8, 4], wait_for_last=False)  # 8, 4 = begin response
+                ec.stamp_triggers(
+                    trial_ids["response_start"], check="int4", wait_for_last=False
+                )
                 pressed, t_press = ec.wait_one_press(max_wait=max_wait)
                 t_response_end = t_press or ec.get_time()
-                ec.stamp_triggers([8, 8], wait_for_last=True)  # 8, 8 = end response
+                ec.stamp_triggers(
+                    trial_ids["response_end"], check="int4", wait_for_last=True
+                )
 
                 # feedback
                 # TODO: debug feedback appearing early during practice of imagine block
@@ -197,15 +248,17 @@ with ExperimentController(
                 if practice:
                     if pressed:
                         feedback_kwargs = correct
+                        extra_feedback_dur = 0.0
                     else:
                         feedback_kwargs = incorrect
                         ec.screen_text(
                             "too slow", pos=(0, -0.075), wrap=False, font_size=18
                         )
+                        extra_feedback_dur = 0.25
                     dot.draw()
                     ec.screen_text(**feedback_kwargs)
                     _ = ec.flip(when=t_response_end + post_response_delay)
-                    ec.wait_secs(feedback_dur)
+                    ec.wait_secs(feedback_dur + extra_feedback_dur)
 
             # logging
             ec.write_data_line("block", value=block_name)
@@ -217,22 +270,41 @@ with ExperimentController(
             ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
 
             # attention check
-            if (
-                pilot != "music"
-                and block_name.startswith("imagine")
-                and (ix % 3 == 0 or (practice and ix % 2 == 0))
-            ):
+            if stim_fname in test_trials and is_click == "imagine":
                 fake = bool(rng.choice(2))
-                if fake:
-                    keyword = fake_keywords.pop()
-                else:
-                    stim_id = attn_pattern.match(stim_fname).group("sent_id")
-                    keyword = keywords[stim_id]
-                attn_press, attn_time = ec.screen_prompt(
-                    f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
-                    live_keys=live_keys,
-                    timestamp=True,
-                )
+                if is_music == "music":
+                    keyword = non_test_trials.pop(-1) if fake else stim_fname
+                    # load the audio file
+                    data, fs = read_wav(stim_file_dir / "test_music" / keyword)
+                    assert fs == 44100, "bad stimulus sampling frequency"
+                    rms_data = 0.01 * data / rms(data)
+                    # bugfix: stimuli are twice as long as they should be
+                    rms_data = rms_data[..., : rms_data.shape[-1] // 2]
+                    ec.load_buffer(rms_data)
+                    stim_duration = rms_data.shape[-1] / fs
+                    ec.screen_text(
+                        '{.align "center"}Did you hear these notes?\n\nPress Y or N.',
+                    )
+                    ec.flip()
+                    ec.wait_secs(0.2)
+                    test_start = ec.start_stimulus(start_of_trial=False, flip=False)
+                    attn_press, attn_time = ec.wait_one_press(
+                        live_keys=live_keys,
+                        timestamp=True,
+                        min_wait=stim_duration,
+                    )
+                    ec.stop()
+                else:  # speech
+                    if fake:
+                        keyword = fake_keywords.pop()
+                    else:
+                        stim_id = attn_pattern.match(stim_fname).group("sent_id")
+                        keyword = keywords[stim_id]
+                    attn_press, attn_time = ec.screen_prompt(
+                        f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
+                        live_keys=live_keys,
+                        timestamp=True,
+                    )
                 # True if pressed Y & it was real, or if pressed N & it was fake
                 correct_response = (attn_press.lower() == yes) != fake
                 if practice:
