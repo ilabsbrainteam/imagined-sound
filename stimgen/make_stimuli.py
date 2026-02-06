@@ -119,11 +119,11 @@ today = date.today().isoformat()
 
 # paths
 project_root = Path(__file__).resolve().parents[1]
-stim_metadata_dir = project_root / "stimuli" / "metadata"
-score_dir = project_root / "stimuli" / "scores"
+stim_metadata_dir = project_root / "stimgen" / "metadata"
+score_dir = project_root / "stimgen" / "scores"
 stim_dir = project_root / "experiment" / "stimuli" / "music"
-wav_dir = project_root / "stimuli" / "music" / today
-test_wav_dir = project_root / "stimuli" / "test_music" / today
+wav_dir = project_root / "stimgen" / "music" / today
+test_wav_dir = project_root / "stimgen" / "test_music" / today
 test_stim_dir = project_root / "experiment" / "stimuli" / "test_music"
 # log_dir = project_root / "logs" / "stimgen"
 for _dir in (score_dir, wav_dir, test_wav_dir, test_stim_dir):

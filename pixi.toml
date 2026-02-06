@@ -39,5 +39,5 @@ dependencies = { fitter = "*", music21 = "*" }
 pypi-dependencies = { cmudict = "*", syllables = "*" }
 
 [feature.stimuli.tasks]
-countsyllables = { cmd = "python characterize_corpus.py", cwd = "stimuli" }
-makemusic = { cmd = "python make_stimuli.py", cwd = "stimuli", depends-on = "countsyllables" }
+countsyllables = { cmd = "python characterize_corpus.py", cwd = "stimgen" }
+makemusic = { cmd = "python make_stimuli.py", cwd = "stimgen", depends-on = "countsyllables" }

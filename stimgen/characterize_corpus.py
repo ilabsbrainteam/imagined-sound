@@ -26,8 +26,8 @@ def count_syllables(sentence):
 
 # paths
 project_root = Path(__file__).parents[1]
-stim_metadata_dir = project_root / "stimuli" / "metadata"
-wav_dir = project_root / "experiment" / "stimuli" / "NWF004"
+stim_metadata_dir = project_root / "stimgen" / "metadata"
+wav_dir = project_root / "experiment" / "stimuli" / "speech"
 
 # get duration of audio files
 wav_files = sorted(wav_dir.glob("NW[MF]0[0-9]_[0-9][0-9]-[0-9][0-9].wav"))

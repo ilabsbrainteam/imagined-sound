@@ -20,7 +20,7 @@ live_keys = [yes, no]
 
 # paths
 project_root = Path(__file__).parents[1]
-stim_metadata_dir = project_root / "stimuli" / "metadata"
+stim_metadata_dir = project_root / "stimgen" / "metadata"
 stim_file_dir = Path(__file__).parent / "stimuli"
 
 # set timing parameters

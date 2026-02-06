@@ -6,7 +6,7 @@ import yaml
 
 # paths
 project_root = Path(__file__).parents[1]
-stim_metadata_dir = project_root / "stimuli" / "metadata"
+stim_metadata_dir = project_root / "stimgen" / "metadata"
 
 with open(stim_metadata_dir / "ieee_sentences.yaml") as fid:
     all_sents = yaml.safe_load(fid)
