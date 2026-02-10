@@ -143,9 +143,15 @@ with ExperimentController(
         stim_folder = block_name.partition("_")[-1]
 
         # pre-select attention-check trials
-        test_trial_indices = np.arange(2, len(block["stims"]), 4)  # every 4th trial
+        test_trial_indices = np.concatenate(
+            (
+                np.arange(1, n_practice, 2),  # every 2nd trial during practice
+                np.arange(n_practice, len(block["stims"]), 4),  # every 4th trial
+            )
+        )
         test_trial_jitter = rng.choice([-1, 0, 1], size=len(test_trial_indices))
         test_trial_jitter[::2] = 0  # only (maybe) jitter every-other trial
+        test_trial_jitter[:n_practice] = 0  # don't jitter during practice
         test_trial_indices += test_trial_jitter
         test_trials = np.array(block["stims"])[test_trial_indices]
         non_test_trials = sorted(set(block["stims"]) - set(test_trials.tolist()))
