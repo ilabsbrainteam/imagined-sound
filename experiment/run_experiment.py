@@ -29,6 +29,7 @@ feedback_dur = 0.6
 inter_trial_interval = 1.0
 n_practice = 5
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
+pre_response_delay = 0.75  # after "did you hear..." and before test stim starts
 post_response_delay = 0.1  # 100 ms
 
 # offset to compensate for MSR's projector (Epson)
@@ -294,7 +295,7 @@ with ExperimentController(
                         '{.align "center"}Did you hear these notes?\n\nPress Y or N.',
                     )
                     ec.flip()
-                    ec.wait_secs(0.2)
+                    ec.wait_secs(pre_response_delay)
                     test_start = ec.start_stimulus(start_of_trial=False, flip=False)
                     attn_press, attn_time = ec.wait_one_press(
                         live_keys=live_keys,
