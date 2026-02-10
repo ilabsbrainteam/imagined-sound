@@ -218,6 +218,7 @@ half_lengths = {
 scores = list()
 stim_ixs = list()
 skipped = defaultdict(list)
+test_melody_indices = dict()
 
 logger.info(separator)
 logger.info("Starting stimulus generation")
@@ -348,6 +349,14 @@ for stim_ix in range(n_stims):
         continue
     # ragged array workaround     ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
     test_melody = test_candidates[rng.choice(len(test_candidates))]
+    # record which note numbers were used as test melody
+    test_melody_index = None
+    for ix in range(len(melody) - len(test_melody) + 1):
+        if melody[ix : (ix + len(test_melody))] == test_melody:
+            test_melody_index = f"{ix}:{ix + len(test_melody)}"
+            break
+    assert test_melody_index is not None
+    test_melody_indices[f"{stim_ix:03}"] = test_melody_index
 
     # bookkeeping (if we've made it this far, the stim will be saved to disk)
     stim_ixs.append(stim_ix)
@@ -381,6 +390,10 @@ if len(skipped):
         f"{len(stim_ixs)} stims will be written to disk "
         f"({len(stim_ixs) / n_stims:.0%} of requested {n_stims})"
     )
+
+# write some metadata
+with open(stim_metadata_dir / "test-melody-indices.yaml", "w") as fid:
+    yaml.safe_dump(test_melody_indices, fid, default_style='"')
 
 # copy WAV files to proper directory
 logger.info(separator)
