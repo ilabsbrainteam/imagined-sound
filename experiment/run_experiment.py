@@ -29,7 +29,7 @@ feedback_dur = 0.6
 inter_trial_interval = 1.0
 n_practice = 5
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
-pre_response_delay = 0.75  # after "did you hear..." and before test stim starts
+pre_response_delay = 1.0  # after "did you hear..." and before test stim starts
 post_response_delay = 0.1  # 100 ms
 
 # offset to compensate for MSR's projector (Epson)
