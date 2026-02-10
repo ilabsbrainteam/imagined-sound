@@ -31,6 +31,9 @@ n_practice = 5
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
 post_response_delay = 0.1  # 100 ms
 
+# offset to compensate for MSR's projector (Epson)
+center_offset = np.array([0.14, -0.05])
+
 # random number generator
 rng = np.random.default_rng(seed=8675309)
 
@@ -109,7 +112,7 @@ _ = [blocks[k].update(stims=v) for k, v in block_stims.items() if k in blocks]
 print("Enter session=1 for speech first, session=2 for music first")
 
 # edit stim_db as needed for MEG Center
-sub_ses = dict(stim_db=80) if msr else dict(participant="foo", session="1", stim_db=65)
+sub_ses = dict(stim_db=70) if msr else dict(participant="foo", session="1", stim_db=65)
 with ExperimentController(
     "prism",
     stim_fs=44100,
@@ -121,10 +124,8 @@ with ExperimentController(
 ) as ec:
     if ec.session == "1":
         block_order = ["click_speech", "click_music", "imagine_speech", "imagine_music"]
-        stim_folder = "speech"
     elif ec.session == "2":
         block_order = ["click_music", "click_speech", "imagine_music", "imagine_speech"]
-        stim_folder = "music"
     else:
         raise ValueError(f"bad session, expected 1 or 2, got {ec.session}")
 
@@ -138,6 +139,7 @@ with ExperimentController(
     # loop over blocks
     for block_name in block_order:
         block = blocks[block_name]
+        stim_folder = block_name.partition("_")[-1]
 
         # pre-select attention-check trials
         test_trial_indices = np.arange(2, len(block["stims"]) + 1, 4)  # every 4th trial
@@ -212,9 +214,12 @@ with ExperimentController(
                 t_response_start = t_response_end = np.nan
                 if practice:
                     feedback_kwargs = incorrect | dict(color=colors["pink"])
-                    ec.screen_text(**feedback_kwargs, font_size=48)
+                    ec.screen_text(**feedback_kwargs, font_size=48, pos=center_offset)
                     ec.screen_text(
-                        "too fast", pos=(0, -0.075), wrap=False, font_size=18
+                        "too fast",
+                        pos=(0, -0.075) + center_offset,
+                        wrap=False,
+                        font_size=18,
                     )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
@@ -252,11 +257,14 @@ with ExperimentController(
                     else:
                         feedback_kwargs = incorrect
                         ec.screen_text(
-                            "too slow", pos=(0, -0.075), wrap=False, font_size=18
+                            "too slow",
+                            pos=(0, -0.075) + center_offset,
+                            wrap=False,
+                            font_size=18,
                         )
                         extra_feedback_dur = 0.25
                     dot.draw()
-                    ec.screen_text(**feedback_kwargs)
+                    ec.screen_text(**feedback_kwargs, pos=center_offset)
                     _ = ec.flip(when=t_response_end + post_response_delay)
                     ec.wait_secs(feedback_dur + extra_feedback_dur)
 
@@ -312,7 +320,7 @@ with ExperimentController(
                         feedback_kwargs = correct | dict(color=colors["green"])
                     else:
                         feedback_kwargs = incorrect | dict(color=colors["pink"])
-                    ec.screen_text(**feedback_kwargs, font_size=48)
+                    ec.screen_text(**feedback_kwargs, font_size=48, pos=center_offset)
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
 
