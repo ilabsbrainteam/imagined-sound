@@ -308,7 +308,7 @@ with ExperimentController(
 
             # attention check
             if stim_fname in test_trials and trial_type == "imagine":
-                fake = bool(rng.choice(2))
+                fake = False if practice else bool(rng.choice(2))
                 if stim_type == "music":
                     keyword = non_test_trials.pop(-1) if fake else stim_fname
                     # load the audio file
