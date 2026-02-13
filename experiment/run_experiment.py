@@ -247,9 +247,6 @@ with ExperimentController(
                     dot.draw()
                     _ = ec.flip()
                     ec.wait_secs(post_response_delay)
-                # TODO maybe stamp triggers here anyway, even though they already
-                #      pressed (and thus contaminated the trial) and we don't really
-                #      care about the actual post-cue reaction time?
             else:  # they waited for the response cue
                 dot.draw()
                 # response period
