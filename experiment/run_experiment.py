@@ -132,11 +132,12 @@ with ExperimentController(
 
     # we'll need this later
     dot = FixationDot(ec)
-    radius = dot._circles[0]._radius
+    radius = dot._circles[0]._radius * font_multiplier
+    dot.set_radius(radius, idx=0, units="pix")
     dot.set_pos(center_offset)
 
     # welcome instructions
-    ec.screen_prompt(prompts["welcome"].format(resp=resp))
+    ec.screen_prompt(prompts["welcome"].format(resp=resp), pos=center_offset)
 
     # loop over blocks
     for block_name in block_order:
@@ -158,13 +159,16 @@ with ExperimentController(
         non_test_trials = sorted(set(block["stims"]) - set(test_trials.tolist()))
 
         # initial instructions
-        ec.screen_prompt(block["prompt"] + paktc)
+        ec.screen_prompt(block["prompt"] + paktc, pos=center_offset)
         ec.screen_prompt(
             f"First let's do {n_practice_trials} practice trials (with feedback). "
-            f"Remember, {block['practice']}{paktc}"
+            f"Remember, {block['practice']}{paktc}",
+            pos=center_offset,
         )
         practice = True
-        ec.screen_prompt("Here we go!", max_wait=block_start_delay, live_keys=[])
+        ec.screen_prompt(
+            "Here we go!", max_wait=block_start_delay, live_keys=[], pos=center_offset
+        )
 
         for ix, stim_fname in enumerate(block["stims"], start=1):
             # load the audio file
@@ -224,12 +228,12 @@ with ExperimentController(
                     feedback_kwargs = incorrect | dict(color=colors["pink"])
                     ec.screen_text(
                         **feedback_kwargs,
-                        font_size=48 * font_multiplier,
+                        font_size=36 * font_multiplier,
                         pos=center_offset,
                     )
                     ec.screen_text(
                         "too fast",
-                        pos=(0, -0.075) + center_offset,
+                        pos=np.array([0, -0.075]) * font_multiplier + center_offset,
                         wrap=False,
                         font_size=18 * font_multiplier,
                     )
@@ -260,8 +264,6 @@ with ExperimentController(
                 )
 
                 # feedback
-                # TODO: debug feedback appearing early during practice of imagine block
-                #       (could it have been an early button press?)
                 if practice:
                     if pressed:
                         feedback_kwargs = correct
@@ -270,13 +272,17 @@ with ExperimentController(
                         feedback_kwargs = incorrect
                         ec.screen_text(
                             "too slow",
-                            pos=(0, -0.075) + center_offset,
+                            pos=np.array([0, -0.075]) * font_multiplier + center_offset,
                             wrap=False,
                             font_size=18 * font_multiplier,
                         )
                         extra_feedback_dur = 0.25
                     dot.draw()
-                    ec.screen_text(**feedback_kwargs, pos=center_offset)
+                    ec.screen_text(
+                        **feedback_kwargs,
+                        pos=center_offset,
+                        font_size=36 * font_multiplier,
+                    )
                     _ = ec.flip(when=t_response_end + post_response_delay)
                     ec.wait_secs(feedback_dur + extra_feedback_dur)
 
@@ -324,6 +330,7 @@ with ExperimentController(
                         f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
                         live_keys=live_keys,
                         timestamp=True,
+                        pos=center_offset,
                     )
                 # True if pressed Y & it was real, or if pressed N & it was fake
                 correct_response = (attn_press.lower() == yes) != fake
@@ -334,7 +341,7 @@ with ExperimentController(
                         feedback_kwargs = incorrect | dict(color=colors["pink"])
                     ec.screen_text(
                         **feedback_kwargs,
-                        font_size=48 * font_multiplier,
+                        font_size=36 * font_multiplier,
                         pos=center_offset,
                     )
                     _ = ec.flip()
@@ -350,7 +357,8 @@ with ExperimentController(
             if ix == n_practice_trials:
                 ec.screen_prompt(
                     "OK, done with practice, so no more feedback. "
-                    f"Remember, {block['practice']}{paktc}"
+                    f"Remember, {block['practice']}{paktc}",
+                    pos=center_offset,
                 )
                 practice = False
 
@@ -367,5 +375,6 @@ with ExperimentController(
             # periodic rest breaks
             if ix > n_practice_trials and (ix - n_practice_trials) % 10 == 0:
                 ec.screen_prompt(
-                    f"Rest break! When you're ready to go on,{paktc.lower()}"
+                    f"Rest break! When you're ready to go on,{paktc.lower()}",
+                    pos=center_offset,
                 )
