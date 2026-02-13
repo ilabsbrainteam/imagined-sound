@@ -4,6 +4,7 @@
 import re
 import yaml
 
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -118,11 +119,25 @@ _ = [
 # add the stimulus lists to each block
 _ = [blocks[k].update(stims=v) for k, v in block_stims.items() if k in blocks]
 
+# allowed block orders
+block_orders = (
+    ["click_speech", "click_music", "imagine_speech", "imagine_music"],
+    ["click_speech", "click_music", "imagine_music", "imagine_speech"],
+    ["click_music", "click_speech", "imagine_music", "imagine_speech"],
+    ["click_music", "click_speech", "imagine_speech", "imagine_music"],
+)
+
 # operator instructions
-print("Enter session=1 for speech first, session=2 for music first")
+print("\n" + "=" * 64)
+print("Enter session = 0 to run all blocks (order chosen automatically)")
+print("Enter session = 1 to run speech-click only")
+print("Enter session = 2 to run speech-imagine only")
+print("Enter session = 3 to run music-click only")
+print("Enter session = 4 to run music-imagine only")
+print("=" * 64 + "\n")
 
 # edit stim_db as needed for MEG Center
-sub_ses = dict(stim_db=70) if msr else dict(participant="foo", session="1", stim_db=65)
+sub_ses = dict(stim_db=70) if msr else dict(participant="foo", session="0", stim_db=65)
 with ExperimentController(
     "prism",
     stim_fs=44100,
@@ -132,12 +147,18 @@ with ExperimentController(
     version="dev",
     **sub_ses,
 ) as ec:
-    if ec.session == "1":
-        block_order = ["click_speech", "click_music", "imagine_speech", "imagine_music"]
+    if ec.session == "0":
+        block_order = block_orders[datetime.now().microsecond % 4]
+    elif ec.session == "1":
+        block_order = ["click_speech"]
     elif ec.session == "2":
-        block_order = ["click_music", "click_speech", "imagine_music", "imagine_speech"]
+        block_order = ["imagine_speech"]
+    elif ec.session == "3":
+        block_order = ["click_music"]
+    elif ec.session == "4":
+        block_order = ["imagine_music"]
     else:
-        raise ValueError(f"bad session, expected 1 or 2, got {ec.session}")
+        raise ValueError(f"bad session, expected 0, 1, 2, 3, or 4, got {ec.session}")
 
     # setup fixation dot. make it 1.5× bigger than default
     dot = FixationDot(ec)
