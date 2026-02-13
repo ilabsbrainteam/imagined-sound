@@ -133,6 +133,7 @@ with ExperimentController(
     # we'll need this later
     dot = FixationDot(ec)
     radius = dot._circles[0]._radius
+    dot.set_pos(center_offset)
 
     # welcome instructions
     ec.screen_prompt(prompts["welcome"].format(resp=resp))
