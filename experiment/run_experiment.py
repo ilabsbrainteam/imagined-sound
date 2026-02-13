@@ -17,6 +17,9 @@ msr = True
 yes = "1" if msr else "y"
 no = "2" if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
+font_multiplier = 2 if msr else 1
+# offset to compensate for MSR's projector (Epson)
+center_offset = np.array([0.14, -0.05]) if msr else np.array([0.0, 0.0])
 
 # paths
 project_root = Path(__file__).parents[1]
@@ -24,16 +27,13 @@ stim_metadata_dir = project_root / "stimgen" / "metadata"
 stim_file_dir = Path(__file__).parent / "stimuli"
 
 # set timing parameters
-block_start_delay = 0.5
-feedback_dur = 0.6
+n_practice_trials = 5
+block_start_delay = 0.75  # duration of "here we go!" message before first stim
+feedback_dur = 0.6  # during practice, how long to show ✔ or ✘
 inter_trial_interval = 1.0
-n_practice = 5
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
 pre_response_delay = 1.0  # after "did you hear..." and before test stim starts
 post_response_delay = 0.1  # 100 ms
-
-# offset to compensate for MSR's projector (Epson)
-center_offset = np.array([0.14, -0.05])
 
 # random number generator
 rng = np.random.default_rng(seed=8675309)
@@ -145,13 +145,13 @@ with ExperimentController(
         # pre-select attention-check trials
         test_trial_indices = np.concatenate(
             (
-                np.arange(1, n_practice, 2),  # every 2nd trial during practice
-                np.arange(n_practice, len(block["stims"]), 4),  # every 4th trial
+                np.arange(1, n_practice_trials, 2),  # every 2nd trial during practice
+                np.arange(n_practice_trials, len(block["stims"]), 4),  # every 4th trial
             )
         )
         test_trial_jitter = rng.choice([-1, 0, 1], size=len(test_trial_indices))
         test_trial_jitter[::2] = 0  # only (maybe) jitter every-other trial
-        test_trial_jitter[:n_practice] = 0  # don't jitter during practice
+        test_trial_jitter[:n_practice_trials] = 0  # don't jitter during practice
         test_trial_indices += test_trial_jitter
         test_trials = np.array(block["stims"])[test_trial_indices]
         non_test_trials = sorted(set(block["stims"]) - set(test_trials.tolist()))
@@ -159,7 +159,7 @@ with ExperimentController(
         # initial instructions
         ec.screen_prompt(block["prompt"] + paktc)
         ec.screen_prompt(
-            f"First let's do {n_practice} practice trials (with feedback). "
+            f"First let's do {n_practice_trials} practice trials (with feedback). "
             f"Remember, {block['practice']}{paktc}"
         )
         practice = True
@@ -221,12 +221,16 @@ with ExperimentController(
                 t_response_start = t_response_end = np.nan
                 if practice:
                     feedback_kwargs = incorrect | dict(color=colors["pink"])
-                    ec.screen_text(**feedback_kwargs, font_size=48, pos=center_offset)
+                    ec.screen_text(
+                        **feedback_kwargs,
+                        font_size=48 * font_multiplier,
+                        pos=center_offset,
+                    )
                     ec.screen_text(
                         "too fast",
                         pos=(0, -0.075) + center_offset,
                         wrap=False,
-                        font_size=18,
+                        font_size=18 * font_multiplier,
                     )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
@@ -267,7 +271,7 @@ with ExperimentController(
                             "too slow",
                             pos=(0, -0.075) + center_offset,
                             wrap=False,
-                            font_size=18,
+                            font_size=18 * font_multiplier,
                         )
                         extra_feedback_dur = 0.25
                     dot.draw()
@@ -327,7 +331,11 @@ with ExperimentController(
                         feedback_kwargs = correct | dict(color=colors["green"])
                     else:
                         feedback_kwargs = incorrect | dict(color=colors["pink"])
-                    ec.screen_text(**feedback_kwargs, font_size=48, pos=center_offset)
+                    ec.screen_text(
+                        **feedback_kwargs,
+                        font_size=48 * font_multiplier,
+                        pos=center_offset,
+                    )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
 
@@ -338,7 +346,7 @@ with ExperimentController(
                 )
 
             # transition from "practice" to "real"
-            if ix == n_practice:
+            if ix == n_practice_trials:
                 ec.screen_prompt(
                     "OK, done with practice, so no more feedback. "
                     f"Remember, {block['practice']}{paktc}"
@@ -356,7 +364,7 @@ with ExperimentController(
             ec.wait_secs(inter_trial_interval)
 
             # periodic rest breaks
-            if ix > n_practice and (ix - n_practice) % 10 == 0:
+            if ix > n_practice_trials and (ix - n_practice_trials) % 10 == 0:
                 ec.screen_prompt(
                     f"Rest break! When you're ready to go on,{paktc.lower()}"
                 )
