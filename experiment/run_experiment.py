@@ -17,7 +17,7 @@ msr = True
 yes = "1" if msr else "y"
 no = "2" if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
-font_multiplier = 2 if msr else 1
+font_multiplier = 1.5 if msr else 1
 # offset to compensate for MSR's projector (Epson)
 center_offset = np.array([0.14, -0.05]) if msr else np.array([0.0, 0.0])
 
@@ -32,7 +32,7 @@ block_start_delay = 0.75  # duration of "here we go!" message before first stim
 feedback_dur = 0.6  # during practice, how long to show ✔ or ✘
 inter_trial_interval = 1.0
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
-pre_response_delay = 1.0  # after "did you hear..." and before test stim starts
+attn_check_delay = 1.0  # after "did you hear..." and before test stim starts
 post_response_delay = 0.1  # 100 ms
 
 # random number generator
@@ -56,17 +56,26 @@ with open("keywords.yaml") as fid:
 with open(stim_metadata_dir / "usable_fakes.yaml") as fid:
     fake_keywords = yaml.safe_load(fid)
 
-# colors
-colors = dict(pink=(187, 85, 102, 255), green=(78, 178, 101, 255))
+# isoluminant colors
+colors = dict(
+    pink=(170, 68, 153, 255), green=(68, 170, 153, 255), gray=(119, 119, 119, 255)
+)
 # convert pyglet RGBA (ints in [0 255]) to matplotlib RGBA (floats in [0 1])
 colors = {k: tuple(map(lambda x: x / 255, v)) for k, v in colors.items()}
 
-# feedback
+# font sizes
+instruction_size = 24 * font_multiplier
+emoji_size = 20 * font_multiplier
+feedback_size = 16 * font_multiplier
+feedback_emoji_size = 24 * font_multiplier
+
+# screen_prompt kwargs
+instruction_kwargs = dict(font_size=instruction_size, pos=center_offset)
+
+# feedback emoji
 always = dict(font_name="DejaVu Sans", wrap=False)
 correct = dict(text="✔", color="w", **always)
 incorrect = dict(text="✘", color="k", **always)
-click_cue = dict(text="🖱️", color="w", **always)
-imagine_cue = dict(text="💭", color="w", **always)
 
 # trigger map
 trial_ids = dict(
@@ -130,17 +139,17 @@ with ExperimentController(
     else:
         raise ValueError(f"bad session, expected 1 or 2, got {ec.session}")
 
-    # we'll need this later
+    # setup fixation dot. make it 1.5× bigger than default
     dot = FixationDot(ec)
-    radius = dot._circles[0]._radius * font_multiplier
+    radius = dot._circles[0]._radius * 1.5 * font_multiplier
     dot.set_radius(radius, idx=0, units="pix")
     dot.set_pos(center_offset)
 
     # welcome instructions
-    ec.screen_prompt(prompts["welcome"].format(resp=resp), pos=center_offset)
+    ec.screen_prompt(prompts["welcome"].format(resp=resp), **instruction_kwargs)
 
     # loop over blocks
-    for block_name in block_order:
+    for block_ix, block_name in enumerate(block_order, start=1):
         block = blocks[block_name]
         stim_folder = block_name.partition("_")[-1]
 
@@ -158,16 +167,25 @@ with ExperimentController(
         test_trials = np.array(block["stims"])[test_trial_indices]
         non_test_trials = sorted(set(block["stims"]) - set(test_trials.tolist()))
 
+        # dot color varies by block
+        base_color = "gray" if block_name.startswith("click") else "gray"
+        cue_color = "green" if block_name.startswith("click") else "gray"
+        dot.set_colors([colors[base_color], "k"])
+
         # initial instructions
-        ec.screen_prompt(block["prompt"] + paktc, pos=center_offset)
+        ec.screen_prompt(block["prompt"] + paktc, **instruction_kwargs)
         ec.screen_prompt(
             f"First let's do {n_practice_trials} practice trials (with feedback). "
             f"Remember, {block['practice']}{paktc}",
-            pos=center_offset,
+            **instruction_kwargs,
         )
         practice = True
         ec.screen_prompt(
-            "Here we go!", max_wait=block_start_delay, live_keys=[], pos=center_offset
+            "Here we go!",
+            max_wait=block_start_delay,
+            live_keys=[],
+            wrap=False,
+            **instruction_kwargs,
         )
 
         for ix, stim_fname in enumerate(block["stims"], start=1):
@@ -177,16 +195,16 @@ with ExperimentController(
             rms_data = 0.01 * data / rms(data)
 
             # identify the trial
-            is_real = "practice" if practice else "real"
-            is_click = "click" if block_name.startswith("click") else "imagine"
-            is_music = "music" if block_name.endswith("music") else "speech"
+            sub_block = "practice" if practice else "real"
+            trial_type = "click" if block_name.startswith("click") else "imagine"
+            stim_type = "music" if block_name.endswith("music") else "speech"
             trial_id = decimals_to_binary(
-                [sum([trial_ids[n] for n in (is_real, is_music, is_click)])], [4]
+                [sum([trial_ids[n] for n in (sub_block, stim_type, trial_type)])], [4]
             )
             ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=trial_id)
 
             # bugfix: stimuli are twice as long as they should be
-            if is_music == "music":
+            if stim_type == "music":
                 rms_data = rms_data[..., : rms_data.shape[-1] // 2]
 
             ec.load_buffer(rms_data)
@@ -199,17 +217,13 @@ with ExperimentController(
             ec.stop()
             ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
 
-            # larger, colored fixation dot during response period
+            # possibly different-colored fixation dot during response period
             # (won't actually appear until `dot.draw()` and `ec.flip()`)
-            # TODO need to add icon/emoji as reminder of the task
-            #      (imagine+click or just click)
-            color = "pink" if block_name.startswith("imagine") else "green"
-            dot.set_colors([colors[color], "k"])
-            dot.set_radius(2 * radius, idx=0, units="pix")
+            dot.set_colors([colors[cue_color], "k"])
 
             # triage trial timing depending on which block we're in
             if block_name.startswith("imagine"):
-                pre_response_delay = 0.1  # short delay, then long time to imagine
+                pre_response_delay = 0.05  # almost no delay, then long time to imagine
                 max_wait = stim_duration * resp_duration_multiplier
             else:
                 pre_response_delay = stim_duration  # long time before buttonpress
@@ -225,17 +239,18 @@ with ExperimentController(
                 # they responded too quickly; maybe give feedback
                 t_response_start = t_response_end = np.nan
                 if practice:
-                    feedback_kwargs = incorrect | dict(color=colors["pink"])
+                    # pink dot with black X and "too fast"
+                    dot.set_colors([colors["pink"], "k"])
+                    dot.draw()
+                    feedback_kwargs = incorrect
                     ec.screen_text(
-                        **feedback_kwargs,
-                        font_size=36 * font_multiplier,
-                        pos=center_offset,
+                        **feedback_kwargs, pos=center_offset, font_size=emoji_size
                     )
                     ec.screen_text(
                         "too fast",
-                        pos=np.array([0, -0.075]) * font_multiplier + center_offset,
+                        pos=np.array([0, -0.075]) + center_offset,
+                        font_size=feedback_size,
                         wrap=False,
-                        font_size=18 * font_multiplier,
                     )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
@@ -266,19 +281,18 @@ with ExperimentController(
                         feedback_kwargs = correct
                         extra_feedback_dur = 0.0
                     else:
+                        dot.set_colors([colors["pink"], "k"])
                         feedback_kwargs = incorrect
                         ec.screen_text(
                             "too slow",
-                            pos=np.array([0, -0.075]) * font_multiplier + center_offset,
+                            pos=np.array([0, -0.075]) + center_offset,
+                            font_size=feedback_size,
                             wrap=False,
-                            font_size=18 * font_multiplier,
                         )
-                        extra_feedback_dur = 0.25
+                        extra_feedback_dur = 0.3
                     dot.draw()
                     ec.screen_text(
-                        **feedback_kwargs,
-                        pos=center_offset,
-                        font_size=36 * font_multiplier,
+                        **feedback_kwargs, pos=center_offset, font_size=emoji_size
                     )
                     _ = ec.flip(when=t_response_end + post_response_delay)
                     ec.wait_secs(feedback_dur + extra_feedback_dur)
@@ -293,9 +307,9 @@ with ExperimentController(
             ec.write_data_line("response", value="press", timestamp=t_press or np.nan)
 
             # attention check
-            if stim_fname in test_trials and is_click == "imagine":
+            if stim_fname in test_trials and trial_type == "imagine":
                 fake = bool(rng.choice(2))
-                if is_music == "music":
+                if stim_type == "music":
                     keyword = non_test_trials.pop(-1) if fake else stim_fname
                     # load the audio file
                     data, fs = read_wav(stim_file_dir / "test_music" / keyword)
@@ -307,14 +321,14 @@ with ExperimentController(
                     stim_duration = rms_data.shape[-1] / fs
                     ec.screen_text(
                         '{.align "center"}Did you hear these notes?\n\nPress Y or N.',
+                        pos=center_offset,
+                        font_size=feedback_size,
                     )
                     ec.flip()
-                    ec.wait_secs(pre_response_delay)
+                    ec.wait_secs(attn_check_delay)
                     test_start = ec.start_stimulus(start_of_trial=False, flip=False)
                     attn_press, attn_time = ec.wait_one_press(
-                        live_keys=live_keys,
-                        timestamp=True,
-                        min_wait=stim_duration,
+                        live_keys=live_keys, timestamp=True, min_wait=stim_duration
                     )
                     ec.stop()
                 else:  # speech
@@ -327,7 +341,7 @@ with ExperimentController(
                         f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
                         live_keys=live_keys,
                         timestamp=True,
-                        pos=center_offset,
+                        **instruction_kwargs,
                     )
                 # True if pressed Y & it was real, or if pressed N & it was fake
                 correct_response = (attn_press.lower() == yes) != fake
@@ -337,9 +351,7 @@ with ExperimentController(
                     else:
                         feedback_kwargs = incorrect | dict(color=colors["pink"])
                     ec.screen_text(
-                        **feedback_kwargs,
-                        font_size=36 * font_multiplier,
-                        pos=center_offset,
+                        **feedback_kwargs, pos=center_offset, font_size=1.5 * emoji_size
                     )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
@@ -355,13 +367,12 @@ with ExperimentController(
                 ec.screen_prompt(
                     "OK, done with practice, so no more feedback. "
                     f"Remember, {block['practice']}{paktc}",
-                    pos=center_offset,
+                    **instruction_kwargs,
                 )
                 practice = False
 
-            # restore dot color and radius
-            dot.set_radius(radius, idx=0, units="pix")
-            dot.set_colors(["w", "k"])
+            # restore dot color
+            dot.set_colors([colors[base_color], "k"])
             dot.draw()
             _ = ec.flip()
 
@@ -373,5 +384,17 @@ with ExperimentController(
             if ix > n_practice_trials and (ix - n_practice_trials) % 10 == 0:
                 ec.screen_prompt(
                     f"Rest break! When you're ready to go on,{paktc.lower()}",
-                    pos=center_offset,
+                    **instruction_kwargs,
                 )
+        # end of block
+        ec.screen_prompt(
+            f"End of block {block_ix}/{len(block_order)}!{paktc}",
+            **instruction_kwargs,
+        )
+    # end of experiment
+    ec.screen_prompt(
+        "Finished! Thank you for participating in science!",
+        max_wait=15,
+        live_keys=[],
+        **instruction_kwargs,
+    )

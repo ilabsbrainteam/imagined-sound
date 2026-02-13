@@ -13,13 +13,14 @@ click_speech_practice: |
   wait for the circle to change color before pressing the button.
 imagine_speech: |
   In this block, you will hear sentences.
-  After the sentence ends, the fixation circle will change color.
-  When that happens, imagine that you are hearing the sentence again (but do not repeat it out loud),
+  After the sentence ends, imagine that you are hearing the sentence again (but do not repeat it out loud),
   and press the response button when you are finished imagining the sentence.
+  The fixation circle will not change color.
   Usually, after a brief delay the next trial will start automatically,
   but some trials will have yes/no questions after them before the next trial starts.
 imagine_speech_practice: |
-  when the circle changes color, imagine hearing the sentence again, then press the button when finished.
+  don't wait for the circle to change color (it won't).
+  When the sentence ends, imagine hearing the sentence again, then press the button when finished.
 click_music: |
   In this block, you will hear music.
   After the music ends, there will be a short delay and then the fixation circle will change color.
@@ -29,10 +30,10 @@ click_music_practice: |
   wait for the circle to change color before pressing the button.
 imagine_music: |
   In this block, you will hear music.
-  After the music ends, the fixation circle will change color.
-  When that happens, imagine that you are hearing the music again (but do not sing or hum it out loud),
+  After the music ends, imagine that you are hearing the music again (but do not sing or hum it out loud),
   and press the response button when you are finished imagining the music.
   Usually, after a brief delay the next trial will start automatically,
   but some trials will have yes/no questions after them before the next trial starts.
 imagine_music_practice: |
-  when the circle changes color, imagine hearing the music again, then press the button when finished.
+  don't wait for the circle to change color (it won't).
+  When the music ends, imagine hearing the music again, then press the button when finished.
