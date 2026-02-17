@@ -126,14 +126,21 @@ block_orders = (
     ["click_music", "click_speech", "imagine_music", "imagine_speech"],
     ["click_music", "click_speech", "imagine_speech", "imagine_music"],
 )
+block_mapping = {
+    "1": "click_speech",
+    "2": "click_music",
+    "3": "imagine_speech",
+    "4": "imagine_music",
+}
 
 # operator instructions
 print("\n" + "=" * 64)
 print("Enter session = 0 to run all blocks (order chosen automatically)")
 print("Enter session = 1 to run speech-click only")
-print("Enter session = 2 to run speech-imagine only")
-print("Enter session = 3 to run music-click only")
+print("Enter session = 2 to run music-click only")
+print("Enter session = 3 to run speech-imagine only")
 print("Enter session = 4 to run music-imagine only")
+print("Enter multiple digits (no spaces) to run multiple blocks")
 print("=" * 64 + "\n")
 
 # edit stim_db as needed for MEG Center
@@ -147,18 +154,30 @@ with ExperimentController(
     version="dev",
     **sub_ses,
 ) as ec:
+    # all sessions requested, return in random(ish) order
     if ec.session == "0":
         block_order = block_orders[datetime.now().microsecond % 4]
-    elif ec.session == "1":
-        block_order = ["click_speech"]
-    elif ec.session == "2":
-        block_order = ["imagine_speech"]
-    elif ec.session == "3":
-        block_order = ["click_music"]
-    elif ec.session == "4":
-        block_order = ["imagine_music"]
+    # custom blocks requested
     else:
-        raise ValueError(f"bad session, expected 0, 1, 2, 3, or 4, got {ec.session}")
+        block_order = [block_mapping.get(ec.session)]  # single block
+    if block_order[0] is None:
+        # must have requested multiple blocks
+        items = set(ec.session)
+        if len(items) != len(ec.session):
+            raise ValueError(
+                "when passing multiple numbers to session, duplicates are not allowed"
+                f"(got {ec.session})"
+            )
+        if nonblocks := (items - set(block_mapping)):
+            raise ValueError("unrecognized block(s) requested in session: {nonblocks}")
+        # at this point, we expect at least 2 digits, and they're unique and valid
+        block_order = list()
+        for char in ec.session:
+            block_order.append(block_mapping[char])
+
+    print("\n" + "=" * 64)
+    print(f"{block_order=}")
+    print("=" * 64 + "\n")
 
     # setup fixation dot. make it 1.5× bigger than default
     dot = FixationDot(ec)
