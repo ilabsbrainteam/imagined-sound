@@ -3,10 +3,14 @@ experiment/logs/
 experiment/stimuli/
 notes/
 old/
-stimuli/metadata/
-stimuli/scores/
-stimuli/music/
-stimuli/test_music/
+stimgen/metadata/
+stimgen/scores/
+stimgen/speech/
+stimgen/music/
+stimgen/test_music/
+
+# files
+experiment/short_block_stims_for_testing.yaml
 
 # pixi environments
 .pixi/*
