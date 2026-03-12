@@ -90,14 +90,14 @@ trial_ids = dict(
     response_start=13,
     response_end=14,
 )
-# real speech click → 4
-# real speech imag  → 8
-# real music click  → 6
-# real music imag   → 10
-# prac speech click → 5
-# prac speech imag  → 9
-# prac music click  → 7
-# prac music imag   → 11
+# real speech click → 4   (4, 8, 4, 4)
+# real speech imag  → 8   (8, 4, 4, 4)
+# real music click  → 6   (4, 8, 8, 4)
+# real music imag   → 10  (8, 4, 8, 4)
+# prac speech click → 5   (4, 8, 4, 8)
+# prac speech imag  → 9   (8, 4, 4, 8)
+# prac music click  → 7   (4, 8, 8, 8)
+# prac music imag   → 11  (8, 4, 8, 8)
 #
 # 2, 3, 15 available for other uses
 
