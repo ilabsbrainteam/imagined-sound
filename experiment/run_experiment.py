@@ -310,7 +310,10 @@ with ExperimentController(
                     trial_ids["response_start"], check="int4", wait_for_last=False
                 )
                 pressed, t_press = ec.wait_one_press(max_wait=max_wait)
-                t_response_end = t_press or ec.get_time()
+                if t_press:
+                    t_response_end = t_response_start + t_press
+                else:
+                    t_response_end = ec.get_time()
                 ec.stamp_triggers(
                     trial_ids["response_end"], check="int4", wait_for_last=True
                 )
