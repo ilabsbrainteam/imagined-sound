@@ -3,11 +3,13 @@
 import re
 import yaml
 
+from collections import defaultdict
 from pathlib import Path
 from warnings import filterwarnings
 
 import mne
 import numpy as np
+import pandas as pd
 from mne_bids import (
     BIDSPath,
     get_anat_landmarks,
@@ -18,35 +20,43 @@ from mne_bids import (
     write_raw_bids,
 )
 
-from score import parse_expyfun_log, score_func
+from score import (
+    EVENT_DICT_NEW_TRIGGERS,
+    EVENT_DICT_OLD_TRIGGERS,
+    parse_expyfun_log,
+    score_func_old_triggers,
+    score_func_new_triggers,
+)
 
 
-EVENT_DICT = {
-    "id_trial": 2,
-    "speech/nothing/stim_start": 111,
-    "speech/nothing/stim_end": 113,
-    "speech/nothing/resp_start": 115,
-    "speech/nothing/resp_end": 117,
-    "speech/imagine/stim_start": 121,
-    "speech/imagine/stim_end": 123,
-    "speech/imagine/resp_start": 125,
-    "speech/imagine/resp_end": 127,
-    "music/nothing/stim_start": 211,
-    "music/nothing/stim_end": 213,
-    "music/nothing/resp_start": 215,
-    "music/nothing/resp_end": 217,
-    "music/imagine/stim_start": 221,
-    "music/imagine/stim_end": 223,
-    "music/imagine/resp_start": 225,
-    "music/imagine/resp_end": 227,
-    "button_1": 301,
-    "button_2": 302,
-    "button_3": 303,
-    "button_4": 304,
+EVENT_DICT_DEFAULT = {
+    "BAD boundary": 999,
+    "EDGE boundary": 998,
 }
-stim_start_events = [
-    EVENT_DICT[key] for key in EVENT_DICT if key.endswith("stim_start")
-]
+
+# EVENT_DICT = {
+#     "id_trial": 2,
+#     "speech/nothing/stim_start": 111,
+#     "speech/nothing/stim_end": 113,
+#     "speech/nothing/resp_start": 115,
+#     "speech/nothing/resp_end": 117,
+#     "speech/imagine/stim_start": 121,
+#     "speech/imagine/stim_end": 123,
+#     "speech/imagine/resp_start": 125,
+#     "speech/imagine/resp_end": 127,
+#     "music/nothing/stim_start": 211,
+#     "music/nothing/stim_end": 213,
+#     "music/nothing/resp_start": 215,
+#     "music/nothing/resp_end": 217,
+#     "music/imagine/stim_start": 221,
+#     "music/imagine/stim_end": 223,
+#     "music/imagine/resp_start": 225,
+#     "music/imagine/resp_end": 227,
+#     "button_1": 301,
+#     "button_2": 302,
+#     "button_3": 303,
+#     "button_4": 304,
+# }
 
 # path stuff
 root = Path("/data/prism").resolve()
@@ -83,15 +93,27 @@ with open(metadata / "bad-channels.yaml") as fid:
 
 read_raw_kw = dict(preload=False, allow_maxshield=True)
 bids_path = BIDSPath(
-    root=bids_root, datatype="meg", suffix="meg", extension=".fif", task="speech"
+    root=bids_root, datatype="meg", suffix="meg", extension=".fif", task="SpeMusImaCli"
 )
 
 # filename patterns
 data_folder_pattern = re.compile(r"\w+/\d+")
-rec_pattern = re.compile(r"prism_(?P<subj>\w+)_(?P<run>\d+)_raw.fif")
+# rec_pattern = re.compile(r"prism_(?P<subj>\w+)_(?P<run>\d+)_raw.fif")
+rec_pattern = re.compile(r"prism_(?P<subj>\w+)_(?P<task>\w+)_(?P<run>\d+)_raw.fif")
 erm_pattern = re.compile(r"prism_(?P<subj>\w+)_erm_raw.fif")
+# tab_pattern = re.compile(
+#     r"prism_(?P<subj>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
+# )
 tab_pattern = re.compile(
-    r"prism_(?P<subj>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
+    r"prism_(?P<subj>\w+)_(?P<task>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
+)
+
+# task dict
+task_dict = dict(
+    speechcontrol="SpeechControl",
+    speechimagine="SpeechImagine",
+    musiccontrol="MusicControl",
+    musicimagine="MusicImagine",
 )
 
 for data_folder in orig_data.rglob("*/*/"):
@@ -100,83 +122,138 @@ for data_folder in orig_data.rglob("*/*/"):
         print(f"skipping folder {_dirpath}")
         continue
     session = _dirpath.parts[-1]
+    # third pilot
+    if session == "260206":
+        score_func = score_func_new_triggers
+        EVENT_DICT = EVENT_DICT_NEW_TRIGGERS | EVENT_DICT_DEFAULT
+        stim_start_events = [
+            val for key, val in EVENT_DICT.items() if key.endswith(("click", "imagine"))
+        ]
+    else:
+        score_func = score_func_old_triggers
+        EVENT_DICT = EVENT_DICT_OLD_TRIGGERS | EVENT_DICT_DEFAULT
+        stim_start_events = [
+            val for key, val in EVENT_DICT.items() if key.endswith("stim_start")
+        ]
+        continue  # TODO TODO TODO TODO TODO TODO TODO REMOVE ME? TODO TODO TODO TODO
     bids_path.update(session=session)
-    rawpaths = list()
     ermpaths = list()
-    tabpaths = list()
+    rawpaths = defaultdict(list)
+    tabpaths = defaultdict(list)
     for _fpath in data_folder.iterdir():
         if rec_match := rec_pattern.match(_fpath.name):
-            rawpaths.append(_fpath)
             subj = rec_match.group("subj")
+            task = rec_match.group("task")
+            rawpaths[task].append(_fpath)
             bids_path.update(subject=subj)
         elif erm_pattern.match(_fpath.name):
             ermpaths.append(_fpath)
-        elif tab_pattern.match(_fpath.name):
-            tabpaths.append(_fpath)
+        elif tab_match := tab_pattern.match(_fpath.name):
+            subj = tab_match.group("subj")
+            task = tab_match.group("task")
+            tabpaths[task].append(_fpath)
     assert len(rawpaths), f"no data files found in {_dirpath}"
     assert len(ermpaths), f"no ERM files found in {_dirpath}"
     assert len(tabpaths), f"no experiment TAB files found in {_dirpath}"
     # TODO handle multiple sessions?
-    assert len(rawpaths) == 1, f"multiple data files found in {_dirpath}"
     assert len(ermpaths) == 1, f"multiple ERM files found in {_dirpath}"
-    assert len(tabpaths) == 1, f"multiple experiment TAB files found in {_dirpath}"
-    rawpath = rawpaths[0]
+    # assert len(rawpaths) == 1, f"multiple data files found in {_dirpath}"
+    # assert len(tabpaths) == 1, f"multiple experiment TAB files found in {_dirpath}"
+    assert all(len(x) == 1 for x in rawpaths.values()), (
+        f"multiple data files found in {_dirpath}"
+    )
+    assert all(len(x) == 1 for x in tabpaths.values()), (
+        f"multiple experiment TAB files found in {_dirpath}"
+    )
     ermpath = ermpaths[0]
-    tabpath = tabpaths[0]
+    # rawpath = rawpaths[0]
+    # tabpath = tabpaths[0]
+    raws = list()
+    dfs = list()
+    evs = list()
     # load the raw
-    raw = mne.io.read_raw_fif(rawpath, **read_raw_kw)
-    erm = mne.io.read_raw_fif(ermpath, **read_raw_kw)
-    # extract events
-    if subj == "cz":  # hack for pilot data
-        stim_type_dict = {"251021": "speech", "251118": "music"}
-        events = score_func(raw=raw, stim_type=stim_type_dict[session])
-    else:
-        events = score_func(raw=raw)
-    write_raw_bids(
-        raw=raw,
-        events=events,
-        event_id=EVENT_DICT,
-        bids_path=bids_path,
-        empty_room=erm,
-        anonymize=dict(daysback=DAYSBACK),
-        overwrite=True,
-    )
-    # mark bads
-    if subj in prebads:
-        mark_channels(
-            bids_path=bids_path,
-            ch_names=prebads[subj][int(session)],
-            status="bad",
-            descriptions="prebad",
-        )
-    # use MNE-BIDS to (re)write the T1, so we can get the side
-    # effect of converting the trans file to a JSON sidecar
-    t1_fname = mri_dir / subj / "mri" / "T1.mgz"
-    trans = mne.read_trans(rawpath.parent / f"prism_{subj}_01-trans.fif")
-    landmarks = get_anat_landmarks(
-        image=t1_fname,
-        info=raw.info,
-        trans=trans,
-        fs_subject=subj,
-        fs_subjects_dir=mri_dir,
-    )
-    mri_path = BIDSPath(root=bids_root, subject=subj, session=session)
-    nii_file = write_anat(
-        image=t1_fname, bids_path=mri_path, landmarks=landmarks, overwrite=True
-    )
-    # write the fine-cal and crosstalk files (once per subject/session)
-    cal_path = BIDSPath(root=bids_root, subject=subj, session=session)
-    write_meg_calibration(cal_dir / "sss_cal_triux.dat", bids_path=cal_path)
-    write_meg_crosstalk(cal_dir / "ct_sparse_triux2.fif", bids_path=cal_path)
+    for task in rawpaths:
+        rawpath = rawpaths[task][0]
+        tabpath = tabpaths[task][0]
+        raw = mne.io.read_raw_fif(rawpath, **read_raw_kw)
+        erm = mne.io.read_raw_fif(ermpath, **read_raw_kw)
+        # extract events
+        if subj == "cz":  # hack for pilot data
+            stim_type_dict = {
+                "251021": "speech",
+                "251118": "music",
+                "260206": "speech" if "speech" in task else "music",
+            }
+            events = score_func(raw=raw, stim_type=stim_type_dict[session])
+        else:
+            events = score_func(raw=raw)
+        # concatenate the separate recordings
+        df = parse_expyfun_log(tabpath=tabpath)
+        if session == "260206":
+            dfs.append(df)
+            raws.append(raw)
+            evs.append(events)
+            if len(raws) < len(rawpaths):
+                continue
+            else:
+                # OK to ignore dev_head_t mismatch, as we have cHPI
+                raw, events = mne.concatenate_raws(
+                    raws=raws, events_list=evs, on_mismatch="ignore"
+                )
+                df = pd.concat(dfs, ignore_index=True)
 
-    # parse experiment logs and write to disk
-    df = parse_expyfun_log(tabpath=tabpath)
-    assert events[np.isin(events[:, -1], stim_start_events)].shape[0] == df.shape[0]
-    # TODO hack for pilot data, these cols will already be there in future
-    if session == "251021":
-        df["block"] = ["click_speech"] * 98 + ["imagine_speech"] * 99
-    elif session == "251118":
-        df["block"] = ["click_music"] * 60 + ["imagine_music"] * 60
-    else:
-        assert "block" in df.columns
-    df.to_csv(trial_info / f"{subj}_{session}_trial_info.csv")
+        # bids_path.update(task=task_dict[task])
+        write_raw_bids(
+            raw=raw,
+            events=events,
+            event_id=EVENT_DICT,
+            bids_path=bids_path,
+            empty_room=erm,
+            anonymize=dict(daysback=DAYSBACK),
+            overwrite=True,
+            # ↓ because we concatenate
+            format="FIF",
+            allow_preload=True,
+        )
+        # mark bads
+        if subj in prebads:
+            mark_channels(
+                bids_path=bids_path,
+                ch_names=prebads[subj][int(session)],
+                status="bad",
+                descriptions="prebad",
+            )
+        # use MNE-BIDS to (re)write the T1, so we can get the side
+        # effect of converting the trans file to a JSON sidecar
+        t1_fname = mri_dir / subj / "mri" / "T1.mgz"
+        trans = mne.read_trans(rawpath.parent / f"prism_{subj}_01-trans.fif")
+        landmarks = get_anat_landmarks(
+            image=t1_fname,
+            info=raw.info,
+            trans=trans,
+            fs_subject=subj,
+            fs_subjects_dir=mri_dir,
+        )
+        mri_path = BIDSPath(root=bids_root, subject=subj, session=session)
+        nii_file = write_anat(
+            image=t1_fname, bids_path=mri_path, landmarks=landmarks, overwrite=True
+        )
+        # write the fine-cal and crosstalk files (once per subject/session)
+        cal_path = BIDSPath(root=bids_root, subject=subj, session=session)
+        write_meg_calibration(cal_dir / "sss_cal_triux.dat", bids_path=cal_path)
+        write_meg_crosstalk(cal_dir / "ct_sparse_triux2.fif", bids_path=cal_path)
+
+        # write experiment logs to disk
+        mask = np.isin(events[:, -1], stim_start_events)
+        if events[mask].shape[0] != df.shape[0]:
+            print(
+                f"BADNESS: N events {mask.sum()} doesn't match N trials from TAB {df.shape[0]}"
+            )
+        # TODO hack for pilot data, these cols will already be there in future
+        if session == "251021":
+            df["block"] = ["click_speech"] * 98 + ["imagine_speech"] * 99
+        elif session == "251118":
+            df["block"] = ["click_music"] * 60 + ["imagine_music"] * 60
+        else:
+            assert "block" in df.columns
+        df.to_csv(trial_info / f"{subj}_{session}_trial_info.csv")

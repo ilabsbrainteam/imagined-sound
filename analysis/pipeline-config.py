@@ -78,7 +78,7 @@ window.
     Enabling interactive mode deactivates parallel processing.
 """
 
-# sessions: list[str] | Literal["all"] = "all"
+sessions: list[str] | Literal["all"] = ["260206"]
 """
 The sessions to process. If `'all'`, will process all sessions found in the
 BIDS dataset.
@@ -90,7 +90,7 @@ Whether to continue processing the dataset if some combinations of `subjects` an
 `sessions` are missing.
 """
 
-task: str = "speech"  # music
+task: str = "SpeMusImaCli"  # MusicImagine, SpeechControl, etc
 """
 The task to process.
 """
@@ -1595,7 +1595,18 @@ exceeds this value, the channels won't be interpolated and the epoch will be dro
 # ## Condition contrasts
 
 contrasts: Sequence[tuple[str, str] | ArbitraryContrast] = [
-    ("imagine/stim_end", "nothing/stim_end"),
+    dict(
+        name="music_imagine-wait",
+        conditions=("music/imagine", "music/click"),
+        weights=[1, 1],
+    ),
+    dict(
+        name="wait_music-speech",
+        conditions=("music/click", "speech/click"),
+        weights=[1, 1],
+    ),
+    #     ("speech/click", "speech/imagine"),
+    #     ("music/imagine", "speech/imagine"),
 ]
 """
 The conditions to contrast via a subtraction of ERPs / ERFs. The list elements

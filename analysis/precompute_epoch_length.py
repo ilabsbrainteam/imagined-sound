@@ -28,8 +28,35 @@ for ev_file in event_files:
     # load the events data from the BIDS tree and assign trial numbers
     # trial zero is assigned to all events prior to the first stimulus
     df = pd.read_csv(ev_file, sep="\t")
-    df["trial_num"] = (df["trial_type"].str.endswith("stim_start")).cumsum()
-    assert df["trial_num"].max() == trial_data.shape[0], "mismatched number of trials"
+    # avoid doing this if already done
+    if "trial_num" not in df.columns:
+        # assign trial numbers
+        df["trial_num"] = pd.array(
+            (df["trial_type"].str.endswith(("click", "imagine"))).cumsum(),
+            dtype=pd.Int64Dtype(),
+        )
+        # fixup for spurious triggers
+        df["spurious_trial"] = df.groupby("trial_num")["trial_type"].transform(
+            lambda x: "stim_end" not in x.array
+        )
+        df.loc[df["spurious_trial"], "trial_num"] = pd.NA
+        # all the spurious triggers come mid-trial, so ffill (not bfill)
+        df["trial_num"] = df["trial_num"].ffill()
+        # handle the initial button-presses from start-of-experiment instructions
+        df["trial_num"] = df["trial_num"].fillna(-1)
+        # now fixup the trial numbers to be sequential
+        df["trial_num"] = (
+            df["trial_num"] != df["trial_num"].shift(periods=1, fill_value=-1)
+        ).cumsum() - 1
+        # cleanup and write to disk
+        df.drop(columns=["spurious_trial"], inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        df.to_csv(ev_file, sep="\t", index=False)
+
+    # minus 1 here because of "trial# -1" ↓↓↓ (button presses preceding first trial)
+    assert df["trial_num"].unique().size - 1 == trial_data.shape[0], (
+        "mismatched number of trials"
+    )
     # determine the ideal epoch length for each trial
     for ix, row in df.iterrows():
         # start of epoch is at stimulus end
@@ -41,7 +68,7 @@ for ev_file in event_files:
         # for "click" blocks we end epoch at START of response period
         if block.startswith("click"):
             end_row = sub_df.loc[sub_df["trial_type"].str.endswith("resp_start")]
-        # for "imagine" blocks we end epoch when they click
+        # for "imagine" blocks we end epoch when they first click
         else:
             end_row = sub_df.loc[sub_df["trial_type"].str.startswith("button")]
         if not len(end_row):
