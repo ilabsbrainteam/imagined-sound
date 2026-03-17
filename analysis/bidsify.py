@@ -182,7 +182,7 @@ for data_folder in orig_data.rglob("*/*/"):
             stim_type_dict = {
                 "251021": "speech",
                 "251118": "music",
-                "260206": "speech" if "speech" in task else "music",
+                "260206": None,  # not used
             }
             events = score_func(raw=raw, stim_type=stim_type_dict[session])
         else:
