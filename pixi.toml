@@ -30,10 +30,11 @@ rsyncstims = {cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment
 
 [feature.analysis]
 platforms = ["linux-64"]
+dependencies = { mne = "*" }  # won't install via pip (openmeeg issue)
 
 [feature.analysis.pypi-dependencies]
-mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "0eff5f1" }
-# mne = { git = "https://github.com/mne-tools/mne-python.git", rev="14d0916", extras=["full"] }
+mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "18af7ca" }
+# mne-bids-pipeline = { path = "/opt/mne/pipeline", editable = true }
 
 [feature.analysis.tasks]
 bidsify = {cmd = "python bidsify.py", cwd = "analysis"}
