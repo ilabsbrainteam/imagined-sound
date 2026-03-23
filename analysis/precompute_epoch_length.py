@@ -26,18 +26,18 @@ for ev_file in event_files:
         root / "experiment-logs" / f"{subj}_{session}_trial_info.csv", index_col=0
     )
     # load the events data from the BIDS tree and assign trial numbers
-    # trial zero is assigned to all events prior to the first stimulus
+    # trial -1 is assigned to all events prior to the first stimulus
     df = pd.read_csv(ev_file, sep="\t")
     # avoid doing this if already done
     if "trial_num" not in df.columns:
         # assign trial numbers
         df["trial_num"] = pd.array(
-            (df["trial_type"].str.endswith(("click", "imagine"))).cumsum(),
+            (df["trial_type"].str.startswith(("practice", "speech", "music"))).cumsum(),
             dtype=pd.Int64Dtype(),
         )
         # fixup for spurious triggers
         df["spurious_trial"] = df.groupby("trial_num")["trial_type"].transform(
-            lambda x: "stim_end" not in x.array
+            lambda x: ~(x.str.startswith("stim_end").any())
         )
         df.loc[df["spurious_trial"], "trial_num"] = pd.NA
         # all the spurious triggers come mid-trial, so ffill (not bfill)
@@ -55,12 +55,12 @@ for ev_file in event_files:
 
     # minus 1 here because of "trial# -1" ↓↓↓ (button presses preceding first trial)
     assert df["trial_num"].unique().size - 1 == trial_data.shape[0], (
-        "mismatched number of trials"
+        f"mismatched number of trials {df['trial_num'].unique().size - 1} vs TAB {trial_data.shape[0]}"
     )
     # determine the ideal epoch length for each trial
     for ix, row in df.iterrows():
         # start of epoch is at stimulus end
-        if not row["trial_type"].endswith("stim_end"):
+        if not row["trial_type"].startswith("stim_end"):
             continue
         sub_df = df.loc[df["trial_num"] == row["trial_num"]]
         # get block identity

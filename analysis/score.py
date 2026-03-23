@@ -57,6 +57,14 @@ EVENT_DICT_NEW_TRIGGERS = {
     "unknown_2": 2,
     "unknown_15": 15,
 }
+# differentiate all the "stim_end" events & event_ids by condition
+trial_id_names = [
+    x for x in list(EVENT_DICT_NEW_TRIGGERS) if x.endswith(("click", "imagine"))
+]
+EVENT_DICT_NEW_TRIGGERS.update(
+    {f"stim_end/{x}": 100 + EVENT_DICT_NEW_TRIGGERS[x] for x in trial_id_names}
+)
+REV_EV_DICT_NEW = {v: k for k, v in EVENT_DICT_NEW_TRIGGERS.items()}
 
 
 def _stack_and_sort_arrays(*arrays):
@@ -190,6 +198,14 @@ def score_func_new_triggers(raw, stim_type=None):
             else:
                 print(f"BADNESS unexpected trial ID {trial_id}")
     new_trial_events = np.array(new_trial_events)
+
+    # mutate stim_end events to reflect trial type (for condition epoching)
+    # (stim_end → stim_end/practice/music/click)
+    for row in new_trial_events:
+        if REV_EV_DICT_NEW[row[-1]] in trial_id_names:
+            trial_id = REV_EV_DICT_NEW[row[-1]]
+        elif REV_EV_DICT_NEW[row[-1]] == "stim_end":
+            row[-1] = EVENT_DICT_NEW_TRIGGERS[f"stim_end/{trial_id}"]
 
     clean_events = _stack_and_sort_arrays(
         button_1_events, button_2_events, new_trial_events
