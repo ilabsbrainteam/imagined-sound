@@ -1102,7 +1102,12 @@ unknown metadata column, a warning will be emitted and all epochs will be kept.
     ```
 """
 
-conditions: Sequence[str] | dict[str, str] | None = ["stim_end"]
+conditions: Sequence[str] | dict[str, str] | None = [
+    "stim_end/music/click",
+    "stim_end/music/imagine",
+    "stim_end/speech/click",
+    # "stim_end/speech/imagine",  # MISSING FROM PILOT #3; RESTORE FOR SUBSEQUENT: TODO
+]
 """
 The time-locked events based on which to create evoked responses.
 This can either be name of the experimental condition as specified in the
@@ -1597,12 +1602,12 @@ exceeds this value, the channels won't be interpolated and the epoch will be dro
 contrasts: Sequence[tuple[str, str] | ArbitraryContrast] = [
     dict(
         name="music_imagine-wait",
-        conditions=("music/imagine", "music/click"),
+        conditions=["music/imagine", "music/click"],
         weights=[1, 1],
     ),
     dict(
         name="wait_music-speech",
-        conditions=("music/click", "speech/click"),
+        conditions=["music/click", "speech/click"],
         weights=[1, 1],
     ),
     #     ("speech/click", "speech/imagine"),
