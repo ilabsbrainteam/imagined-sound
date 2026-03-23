@@ -186,7 +186,6 @@ imagine_speech:
   - NWF04_67-10.wav
   - NWF04_68-02.wav
   - NWF04_68-08.wav
-  - NWF04_69-10.wav
   - NWF04_70-01.wav
   - NWF04_70-02.wav
   - NWF04_70-04.wav
@@ -196,8 +195,10 @@ imagine_speech:
   - NWF04_71-05.wav
   - NWF04_71-06.wav
   - NWF04_71-08.wav
+  - NWF04_71-10.wav
   - NWF04_72-05.wav
   - NWF04_72-06.wav
+  - NWF04_72-10.wav
 click_music:
   - 000.wav
   - 001.wav
