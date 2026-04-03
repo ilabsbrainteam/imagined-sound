@@ -1,7 +1,6 @@
 # Author: Daniel McCloy <dan@mccloy.info>
 #
 # License: BSD (3-clause)
-import re
 import yaml
 
 from datetime import datetime
@@ -68,7 +67,6 @@ colors = {k: tuple(map(lambda x: x / 255, v)) for k, v in colors.items()}
 instruction_size = 24 * font_multiplier
 emoji_size = 20 * font_multiplier
 feedback_size = 16 * font_multiplier
-feedback_emoji_size = 24 * font_multiplier
 
 # screen_prompt kwargs
 instruction_kwargs = dict(font_size=instruction_size, pos=center_offset)
@@ -100,9 +98,6 @@ trial_ids = dict(
 # prac music imag   → 11  (8, 4, 8, 8)
 #
 # 2, 3, 15 available for other uses
-
-# needed for behavioral check (to look up keywords)
-attn_pattern = re.compile(r"NW[FM]0\d_(?P<sent_id>\d\d-\d\d).wav")
 
 # gather up all the bits that differ between blocks
 blocks = {
@@ -294,8 +289,6 @@ with ExperimentController(
                     )
                     _ = ec.flip()
                     ec.wait_secs(feedback_dur)
-                    # TODO: force a buttonpress to advance, when response was too quick?
-                    #       or just make `feedback_dur` longer?
                 else:
                     # show the dot briefly, so we don't give away the fact that the
                     # press was early (by not showing the dot)
