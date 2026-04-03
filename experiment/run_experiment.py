@@ -345,40 +345,29 @@ with ExperimentController(
             # attention check
             if stim_fname in test_trials and trial_type == "imagine":
                 fake = False if practice else bool(rng.choice(2))
-                if stim_type == "music":
-                    keyword = non_test_trials.pop(-1) if fake else stim_fname
-                    # load the audio file
-                    data, fs = read_wav(stim_file_dir / "test_music" / keyword)
-                    assert fs == 44100, "bad stimulus sampling frequency"
-                    rms_data = 0.01 * data / rms(data)
-                    # bugfix: stimuli are twice as long as they should be
-                    rms_data = rms_data[..., : rms_data.shape[-1] // 2]
-                    ec.load_buffer(rms_data)
-                    stim_duration = rms_data.shape[-1] / fs
-                    ec.screen_text(
-                        '{.align "center"}Did you hear these notes?\n\nPress Y or N.',
-                        pos=center_offset,
-                        font_size=feedback_size,
-                    )
-                    ec.flip()
-                    ec.wait_secs(attn_check_delay)
-                    test_start = ec.start_stimulus(start_of_trial=False, flip=False)
-                    attn_press, attn_time = ec.wait_one_press(
-                        live_keys=live_keys, timestamp=True, min_wait=stim_duration
-                    )
-                    ec.stop()
-                else:  # speech
-                    if fake:
-                        keyword = fake_keywords.pop()
-                    else:
-                        stim_id = attn_pattern.match(stim_fname).group("sent_id")
-                        keyword = keywords[stim_id]
-                    attn_press, attn_time = ec.screen_prompt(
-                        f'{{.align "center"}}Did you hear the word "{keyword}"?\n\nPress Y or N.',
-                        live_keys=live_keys,
-                        timestamp=True,
-                        **instruction_kwargs,
-                    )
+                test_stim_fname = non_test_trials.pop(-1) if fake else stim_fname
+                # load the audio file
+                data, fs = read_wav(
+                    stim_file_dir / f"test_{stim_type}" / test_stim_fname
+                )
+                assert fs == 44100, "bad stimulus sampling frequency"  # TODO 24414
+                rms_data = 0.01 * data / rms(data)  # TODO shouldn't be necessary
+                # # bugfix: stimuli are twice as long as they should be
+                # rms_data = rms_data[..., : rms_data.shape[-1] // 2]
+                ec.load_buffer(rms_data)
+                stim_duration = rms_data.shape[-1] / fs
+                msg = "these notes" if stim_type == "music" else "this word"
+                ec.screen_text(
+                    f'{{.align "center"}}Did you hear {msg}?\n\nPress Y or N.',
+                    **instruction_kwargs,
+                )
+                ec.flip()
+                ec.wait_secs(attn_check_delay)
+                test_start = ec.start_stimulus(start_of_trial=False, flip=False)
+                attn_press, attn_time = ec.wait_one_press(
+                    live_keys=live_keys, timestamp=True, min_wait=stim_duration
+                )
+                ec.stop()
                 # True if pressed Y & it was real, or if pressed N & it was fake
                 correct_response = (attn_press.lower() == yes) != fake
                 if practice:
@@ -393,7 +382,9 @@ with ExperimentController(
                     ec.wait_secs(feedback_dur)
 
                 ec.write_data_line("attn_is_fake", value=fake, timestamp=None)
-                ec.write_data_line("attn_keyword", value=keyword, timestamp=None)
+                ec.write_data_line(
+                    "attn_keyword", value=test_stim_fname, timestamp=None
+                )
                 ec.write_data_line(
                     "attn_correct", value=correct_response, timestamp=attn_time
                 )
