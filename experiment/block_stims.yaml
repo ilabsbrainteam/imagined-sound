@@ -286,7 +286,6 @@ click_music:
   - 128.wav
   - 129.wav
   - 132.wav
-  - 133.wav
   - 134.wav
   - 135.wav
   - 137.wav
@@ -300,8 +299,8 @@ click_music:
   - 151.wav
   - 152.wav
   - 153.wav
-imagine_music:
   - 154.wav
+imagine_music:
   - 156.wav
   - 158.wav
   - 164.wav
