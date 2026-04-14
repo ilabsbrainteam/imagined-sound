@@ -21,7 +21,7 @@ dependencies = { ffmpeg = "<8", scp = "*" }
 
 [feature.experiment.pypi-dependencies]
 expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
-rtmixer = { git = "https://github.com/spatialaudio/python-rtmixer.git", rev = "d858362" }
+rtmixer = "==0.1.7"
 
 [feature.experiment.tasks]
 experiment = {cmd = "python run_experiment.py", cwd = "experiment"}
