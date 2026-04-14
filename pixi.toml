@@ -12,7 +12,7 @@ pyyaml = ">=6.0.3,<7"
 
 [environments]
 experiment = ["experiment"]
-analysis = ["analysis", "experiment"]
+analysis = ["analysis"]
 stimuli = ["stimuli"]
 
 [feature.experiment]
@@ -22,6 +22,9 @@ dependencies = { ffmpeg = "<8", scp = "*" }
 [feature.experiment.pypi-dependencies]
 expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
 rtmixer = "==0.1.7"
+
+[feature.experiment.target.win-64.dependencies]
+python = "3.10.*"
 
 [feature.experiment.tasks]
 experiment = {cmd = "python run_experiment.py", cwd = "experiment"}
@@ -33,8 +36,8 @@ platforms = ["linux-64"]
 dependencies = { mne = "*" }  # won't install via pip (openmeeg issue)
 
 [feature.analysis.pypi-dependencies]
+expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
 mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "18af7ca" }
-# mne-bids-pipeline = { path = "/opt/mne/pipeline", editable = true }
 
 [feature.analysis.tasks]
 bidsify = {cmd = "python bidsify.py", cwd = "analysis"}
