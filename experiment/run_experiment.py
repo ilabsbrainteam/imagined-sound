@@ -18,8 +18,9 @@ yes = "1" if msr else "y"
 no = "2" if msr else "n"  # yes,no should be adjacent buttons. could also be 3,4
 live_keys = [yes, no]
 font_multiplier = 1.5 if msr else 1
-# offset to compensate for MSR's projector (Epson)
-center_offset = np.array([0.14, -0.05]) if msr else np.array([0.0, 0.0])
+# offset to compensate for MSR's old projector (Epson)
+# center_offset = np.array([0.14, -0.05]) if msr else np.array([0.0, 0.0])
+center_offset = np.array([0.0, 0.0])
 
 # paths
 project_root = Path(__file__).parents[1]
