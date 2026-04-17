@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from expyfun import ExperimentController, decimals_to_binary
-from expyfun.stimuli import read_wav, rms
+from expyfun.stimuli import read_wav
 from expyfun.visual import FixationDot
 
 # are we running in the MSR at the MEG center, or piloting elsewhere?
@@ -228,7 +228,6 @@ with ExperimentController(
             # load the audio file
             data, fs = read_wav(stim_file_dir / stim_folder / stim_fname)
             assert fs == 44100, "bad stimulus sampling frequency"
-            rms_data = 0.01 * data / rms(data)
 
             # identify the trial
             sub_block = "practice" if practice else "real"
@@ -239,12 +238,8 @@ with ExperimentController(
             )
             ec.identify_trial(ec_id=f"{stim_fname}", ttl_id=trial_id)
 
-            # bugfix: stimuli are twice as long as they should be
-            if stim_type == "music":
-                rms_data = rms_data[..., : rms_data.shape[-1] // 2]
-
-            ec.load_buffer(rms_data)
-            stim_duration = rms_data.shape[-1] / fs
+            ec.load_buffer(data)
+            stim_duration = data.shape[-1] / fs
             dot.draw()
 
             # start the trial
@@ -352,11 +347,8 @@ with ExperimentController(
                     stim_file_dir / f"test_{stim_type}" / test_stim_fname
                 )
                 assert fs == 44100, "bad stimulus sampling frequency"  # TODO 24414
-                rms_data = 0.01 * data / rms(data)  # TODO shouldn't be necessary
-                # # bugfix: stimuli are twice as long as they should be
-                # rms_data = rms_data[..., : rms_data.shape[-1] // 2]
-                ec.load_buffer(rms_data)
-                stim_duration = rms_data.shape[-1] / fs
+                ec.load_buffer(data)
+                stim_duration = data.shape[-1] / fs
                 msg = "these notes" if stim_type == "music" else "this word"
                 ec.screen_text(
                     f'{{.align "center"}}Did you hear {msg}?\n\nPress Y or N.',
