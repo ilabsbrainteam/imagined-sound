@@ -66,7 +66,7 @@ colors = {k: tuple(map(lambda x: x / 255, v)) for k, v in colors.items()}
 
 # font sizes
 instruction_size = 24 * font_multiplier
-emoji_size = 20 * font_multiplier
+emoji_size = 28 * font_multiplier
 feedback_size = 16 * font_multiplier
 
 # screen_prompt kwargs
@@ -175,11 +175,13 @@ with ExperimentController(
     print(f"{block_order=}")
     print("=" * 64 + "\n")
 
-    # setup fixation dot. make it 1.5× bigger than default
+    # setup fixation dot. make it 2.5× bigger than default
     dot = FixationDot(ec)
-    radius = dot._circles[0]._radius * 1.5 * font_multiplier
-    dot.set_radius(radius, idx=0, units="pix")
+    radius = dot._circles[0]._radius * 2.5 * font_multiplier
+    radius[1] = dot._circles[1]._radius[0] * 2.5 * font_multiplier
+    dot.set_radii(radius, units="pix")
     dot.set_pos(center_offset)
+    text_offset_below_dot = -0.1  # for "too fast/slow" feedback
 
     # welcome instructions
     ec.screen_prompt(prompts["welcome"].format(resp=resp), **instruction_kwargs)
@@ -279,7 +281,7 @@ with ExperimentController(
                     )
                     ec.screen_text(
                         "too fast",
-                        pos=np.array([0, -0.075]) + center_offset,
+                        pos=np.array([0, text_offset_below_dot]) + center_offset,
                         font_size=feedback_size,
                         wrap=False,
                     )
@@ -317,7 +319,7 @@ with ExperimentController(
                         feedback_kwargs = incorrect
                         ec.screen_text(
                             "too slow",
-                            pos=np.array([0, -0.075]) + center_offset,
+                            pos=np.array([0, text_offset_below_dot]) + center_offset,
                             font_size=feedback_size,
                             wrap=False,
                         )
