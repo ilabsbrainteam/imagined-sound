@@ -352,8 +352,19 @@ with ExperimentController(
                 ec.load_buffer(data)
                 stim_duration = data.shape[-1] / fs
                 msg = "these notes" if stim_type == "music" else "this word"
+                trial = "melody" if stim_type == "music" else "sentence"
+                color = "{{color ({}, 255)}}"
+                font = "{{font_size {}}}"
+                blue = color.format("0, 128, 255")
+                yellow = color.format("255, 255, 0")
+                white = color.format("255, 255, 255")
+                large = font.format(str(int(1.5 * instruction_size)))
+                normal = font.format(str(instruction_size))
+                yes_glyph = f"{blue}{large}●{normal}{white}"
+                no_glyph = f"{yellow}{large}●{normal}{white}"
                 ec.screen_text(
-                    f'{{.align "center"}}Did you hear {msg}?\n\nPress Y or N.',
+                    f'{{.align "center"}}Did you hear {msg} in that {trial}?\n\n'
+                    f"Press Y {yes_glyph} or N {no_glyph}.",
                     **instruction_kwargs,
                 )
                 ec.flip()
