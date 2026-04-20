@@ -23,7 +23,7 @@ font_multiplier = 1.5 if msr else 1
 center_offset = np.array([0.0, 0.0])
 
 # paths
-project_root = Path(__file__).parents[1]
+project_root = Path(__file__).resolve().parents[1]
 stim_metadata_dir = project_root / "stimgen" / "metadata"
 stim_file_dir = Path(__file__).parent / "stimuli"
 
