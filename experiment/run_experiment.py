@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from expyfun import ExperimentController, decimals_to_binary
-from expyfun.stimuli import read_wav
+from expyfun.stimuli import get_tdt_rates, read_wav
 from expyfun.visual import FixationDot
 
 # are we running in the MSR at the MEG center, or piloting elsewhere?
@@ -143,7 +143,7 @@ print("=" * 64 + "\n")
 sub_ses = dict(stim_db=70) if msr else dict(participant="foo", session="0", stim_db=65)
 with ExperimentController(
     "prism",
-    stim_fs=44100,
+    stim_fs=get_tdt_rates()["25k"],
     stim_rms=0.01,
     check_rms=None,
     output_dir="logs",
@@ -229,7 +229,7 @@ with ExperimentController(
         for ix, stim_fname in enumerate(block["stims"], start=1):
             # load the audio file
             data, fs = read_wav(stim_file_dir / stim_folder / stim_fname)
-            assert fs == 44100, "bad stimulus sampling frequency"
+            assert int(fs) == 24414, "bad stimulus sampling frequency"
 
             # identify the trial
             sub_block = "practice" if practice else "real"
@@ -348,7 +348,7 @@ with ExperimentController(
                 data, fs = read_wav(
                     stim_file_dir / f"test_{stim_type}" / test_stim_fname
                 )
-                assert fs == 44100, "bad stimulus sampling frequency"  # TODO 24414
+                assert int(fs) == 24414, "bad stimulus sampling frequency"
                 ec.load_buffer(data)
                 stim_duration = data.shape[-1] / fs
                 msg = "these notes" if stim_type == "music" else "this word"
