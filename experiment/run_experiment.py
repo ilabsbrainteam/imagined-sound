@@ -27,14 +27,14 @@ project_root = Path(__file__).resolve().parents[1]
 stim_metadata_dir = project_root / "stimgen" / "metadata"
 stim_file_dir = Path(__file__).parent / "stimuli"
 
-# set timing parameters
+# set timing parameters (in seconds)
 n_practice_trials = 5
 block_start_delay = 0.75  # duration of "here we go!" message before first stim
 feedback_dur = 0.6  # during practice, how long to show ✔ or ✘
 inter_trial_interval = 1.0
 resp_duration_multiplier = 2.0  # multiplied by stimulus duration to get max timeout
-attn_check_delay = 1.0  # after "did you hear..." and before test stim starts
-post_response_delay = 0.1  # 100 ms
+attn_check_delay = 1.25  # after "did you hear..." and before test stim starts
+post_response_delay = 0.1
 
 # random number generator
 rng = np.random.default_rng(seed=8675309)
