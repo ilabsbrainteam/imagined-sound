@@ -7,13 +7,17 @@ version = "0.1.0"
 
 [dependencies]
 ipython = "*"
+mne = "*"
 numpy = ">=2,<3"
 pyyaml = ">=6.0.3,<7"
+
+[pypi-dependencies]
+expyfun = "*"
 
 [environments]
 experiment = ["experiment"]
 analysis = ["analysis"]
-stimuli = ["stimuli"]
+stimgen = ["stimgen"]
 
 [feature.experiment]
 platforms = ["linux-64", "win-64"]
@@ -24,7 +28,7 @@ expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extra
 rtmixer = "==0.1.7"
 
 [feature.experiment.target.win-64.dependencies]
-python = "3.10.*"
+python = "3.10.*"  # rtmixer wheel compatibility
 
 [feature.experiment.tasks]
 experiment = {cmd = "python run_experiment.py", cwd = "experiment"}
@@ -33,10 +37,8 @@ rsyncstims = {cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment
 
 [feature.analysis]
 platforms = ["linux-64"]
-dependencies = { mne = "*" }  # won't install via pip (openmeeg issue)
 
 [feature.analysis.pypi-dependencies]
-expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
 mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "18af7ca" }
 
 [feature.analysis.tasks]
@@ -44,11 +46,11 @@ bidsify = {cmd = "python bidsify.py", cwd = "analysis"}
 epochdur = {cmd = "python precompute_epoch_length.py", cwd = "analysis"}
 pipeline = {cmd = "mne_bids_pipeline --config pipeline-config.py {{ args }}", cwd = "analysis", depends-on = "epochdur", args = [{arg = "args", default = ""}]}
 
-[feature.stimuli]
+[feature.stimgen]
 channels = ["conda-forge", "bioconda"]
 dependencies = { fitter = "*", music21 = "*" }
 pypi-dependencies = { cmudict = "*", syllables = "*" }
 
-[feature.stimuli.tasks]
+[feature.stimgen.tasks]
 countsyllables = { cmd = "python characterize_corpus.py", cwd = "stimgen" }
 makemusic = { cmd = "python make_stimuli.py", cwd = "stimgen", depends-on = "countsyllables" }
