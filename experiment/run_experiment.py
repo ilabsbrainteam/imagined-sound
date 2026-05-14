@@ -25,7 +25,7 @@ center_offset = np.array([0.0, 0.0])
 # paths
 project_root = Path(__file__).resolve().parents[1]
 stim_metadata_dir = project_root / "stimgen" / "metadata"
-stim_file_dir = Path(__file__).parent / "stimuli"
+stim_file_dir = project_root / "experiment" / "stimuli"
 
 # set timing parameters (in seconds)
 n_practice_trials = 5
@@ -88,6 +88,7 @@ trial_ids = dict(
     stim_stop=12,
     response_start=13,
     response_end=14,
+    finale=15,
 )
 # real speech click → 4   (4, 8, 4, 4)
 # real speech imag  → 8   (8, 4, 4, 4)
@@ -98,13 +99,13 @@ trial_ids = dict(
 # prac music click  → 7   (4, 8, 8, 8)
 # prac music imag   → 11  (8, 4, 8, 8)
 #
-# 2, 3, 15 available for other uses
+# 2, 3 available for other uses
 
 # gather up all the bits that differ between blocks
 blocks = {
     k: dict(prompt=v)
     for k, v in prompts.items()
-    if k != "welcome" and not k.endswith("practice")
+    if k not in ("welcome", "finale") and not k.endswith("practice")
 }
 # add in the practice instructions
 _ = [
@@ -121,12 +122,14 @@ block_orders = (
     ["click_speech", "click_music", "imagine_music", "imagine_speech"],
     ["click_music", "click_speech", "imagine_music", "imagine_speech"],
     ["click_music", "click_speech", "imagine_speech", "imagine_music"],
+    [],  # for finale-only testing
 )
 block_mapping = {
     "1": "click_speech",
     "2": "click_music",
     "3": "imagine_speech",
     "4": "imagine_music",
+    "5": "finale",
 }
 
 # operator instructions
@@ -136,7 +139,8 @@ print("Enter session = 1 to run speech-click only")
 print("Enter session = 2 to run music-click only")
 print("Enter session = 3 to run speech-imagine only")
 print("Enter session = 4 to run music-imagine only")
-print("Enter multiple digits (no spaces) to run multiple blocks")
+print("Enter session = 5 to run finale only")
+print("Enter multiple digits 1-4 (no spaces) to run multiple blocks")
 print("=" * 64 + "\n")
 
 # edit stim_db as needed for MEG Center
@@ -171,9 +175,13 @@ with ExperimentController(
         for char in ec.session:
             block_order.append(block_mapping[char])
 
+    # tell the operator which blocks were requested...
     print("\n" + "=" * 64)
     print(f"{block_order=}")
     print("=" * 64 + "\n")
+    # but if just running finale, make block_order empty (to skip data block loop)
+    if block_order == ["finale"]:
+        block_order = []
 
     # setup fixation dot. make it 2.5× bigger than default
     dot = FixationDot(ec)
@@ -188,6 +196,7 @@ with ExperimentController(
 
     # loop over blocks
     for block_ix, block_name in enumerate(block_order, start=1):
+        assert isinstance(block_name, str)
         block = blocks[block_name]
         stim_folder = block_name.partition("_")[-1]
 
@@ -424,6 +433,56 @@ with ExperimentController(
             f"End of block {block_ix}/{len(block_order)}!{paktc}",
             **instruction_kwargs,
         )
+    # final block: calibrate the facial electrode responses
+    ec.screen_prompt(prompts["finale"].format(resp=resp), **instruction_kwargs)
+    ec.screen_prompt(
+        "Here we go!",
+        max_wait=block_start_delay,
+        live_keys=[],
+        wrap=False,
+        **instruction_kwargs,
+    )
+    subvoc_music = sorted((stim_file_dir / "subvoc_music").glob("*.wav"))
+    subvoc_speech = sorted((stim_file_dir / "subvoc_speech").glob("*.wav"))
+    stims_music = rng.permutation(subvoc_music)
+    stims_speech = rng.choice(subvoc_speech, size=len(subvoc_music), replace=False)
+    chunk = len(subvoc_music) // 3
+    interleaved = [
+        *stims_speech[:chunk],
+        *stims_music[:chunk],
+        *stims_speech[chunk : 2 * chunk],
+        *stims_music[chunk : 2 * chunk],
+        *stims_speech[2 * chunk :],
+        *stims_music[2 * chunk :],
+    ]
+    for ix, stim_path in enumerate(interleaved):
+        # task instruction
+        if ix < 2 * len(subvoc_music) // 3:
+            ec.screen_text("Listen quietly", **instruction_kwargs)
+        elif ix < 4 * len(subvoc_music) // 3:
+            ec.screen_text("Repeat quietly under your breath", **instruction_kwargs)
+        else:
+            ec.screen_text("Repeat aloud", **instruction_kwargs)
+        # load file
+        data, fs = read_wav(stim_path)
+        assert int(fs) == 24414, "bad stimulus sampling frequency"
+        ec.load_buffer(data)
+        # play stimulus
+        trial_id = decimals_to_binary([trial_ids["finale"]], [4])
+        ec.identify_trial(ec_id=f"{stim_path.name}", ttl_id=trial_id)
+        stim_duration = data.shape[-1] / fs
+        t_stim_start = ec.start_stimulus()
+        ec.wait_secs(stim_duration)
+        ec.stop()
+        ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
+        ec.wait_secs(2 * stim_duration + inter_trial_interval)
+        # logging
+        ec.write_data_line("block", value="finale")
+        ec.write_data_line("practice", value=False)
+        ec.write_data_line("stimulus", value=stim_path.name, timestamp=t_stim_start)
+        ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
+        ec.trial_ok()
+
     # end of experiment
     ec.screen_prompt(
         "Finished! Thank you for participating in science!",

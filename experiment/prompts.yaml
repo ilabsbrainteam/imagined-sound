@@ -37,3 +37,9 @@ imagine_music: |
 imagine_music_practice: |
   don't wait for the circle to change color (it won't).
   When the music ends, imagine hearing the music again, then press the button when finished.
+finale: |
+  Just one more quick task!
+  You'll hear a few more sounds, and we'll ask you to either listen quietly, repeat quietly under your breath, or repeat out loud.
+  When repeating the musical sounds out loud, hum them. For the speech, repeat the syllable.
+  These will auto-advance, so no button presses needed.
+  Press any {resp} when you're ready to start.
