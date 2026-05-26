@@ -28,6 +28,8 @@ from music21.stream import Stream
 from music21.tempo import MetronomeMark
 from music21.tie import Tie
 
+from helpers import midi_to_wav
+
 logging.basicConfig(format="{name}:{levelname}: {message}", style="{")
 logger = logging.getLogger("prism")
 logger.setLevel(logging.INFO)
@@ -56,23 +58,6 @@ def insert_metronome_mark_into_score(score, tempo):
         0
     ].music.compositeMusic.contents.sequentialMusic.musicList.contents.insert(
         2, tempo_mark
-    )
-
-
-def midi_to_wav(midi_path, wav_path):
-    subprocess.run(
-        [
-            "timidity",
-            "--quiet=2",
-            # append ↓ 8,1,2: 8,16,24-bits, u/s: (un)signed, l(inear), M(ono)/S(tereo)
-            "--output-mode=wM",
-            f"--output-file={wav_path}",
-            str(midi_path),
-            "-EFreverb=0",
-            "--sampling-freq=44100",
-        ],
-        check=True,
-        timeout=10,
     )
 
 
