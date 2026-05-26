@@ -456,13 +456,19 @@ with ExperimentController(
         *stims_music[2 * chunk :],
     ]
     for ix, stim_path in enumerate(interleaved):
+        new_task = ""
         # task instruction
-        if ix < 2 * len(subvoc_music) // 3:
-            ec.screen_text("Listen quietly", **instruction_kwargs)
-        elif ix < 4 * len(subvoc_music) // 3:
-            ec.screen_text("Repeat quietly under your breath", **instruction_kwargs)
-        else:
-            ec.screen_text("Repeat aloud", **instruction_kwargs)
+        if ix == 0:
+            new_task = "Listen quietly"
+        elif ix == 2 * chunk:
+            new_task = "Repeat quietly under your breath"
+        elif ix == 4 * chunk:
+            new_task = "Repeat out loud"
+        # pause to read instructions
+        if new_task:
+            ec.screen_text(new_task, **instruction_kwargs)
+            ec.flip()
+            ec.wait_secs(2.0)
         # load file
         data, fs = read_wav(stim_path)
         assert int(fs) == 24414, "bad stimulus sampling frequency"
@@ -471,11 +477,12 @@ with ExperimentController(
         trial_id = decimals_to_binary([trial_ids["finale"]], [4])
         ec.identify_trial(ec_id=f"{stim_path.name}", ttl_id=trial_id)
         stim_duration = data.shape[-1] / fs
-        t_stim_start = ec.start_stimulus()
+        t_stim_start = ec.start_stimulus(flip=False)
         ec.wait_secs(stim_duration)
         ec.stop()
         ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
-        ec.wait_secs(2 * stim_duration + inter_trial_interval)
+        mult = 0.5 if stim_path in stims_music else 3.0
+        ec.wait_secs(mult * stim_duration + inter_trial_interval)
         # logging
         ec.write_data_line("block", value="finale")
         ec.write_data_line("practice", value=False)

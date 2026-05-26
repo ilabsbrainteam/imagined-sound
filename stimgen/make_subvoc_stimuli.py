@@ -14,7 +14,7 @@ wav_dir = project_root / "stimgen" / "subvoc_music"
 
 notes = ChromaticScale("C4")
 
-for pitch in notes.pitches:
+for pitch in notes.pitches[:-1]:  # omit octave
     stream = Stream([Note(pitch=pitch)])
     # write stream to (temporary MIDI file, then to) WAV
     midi_path = stream.write(fmt="midi")  # fp=path/to/midi → save elsewhere than /tmp/
