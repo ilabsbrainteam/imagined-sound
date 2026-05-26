@@ -47,9 +47,9 @@ epochdur = {cmd = "python precompute_epoch_length.py", cwd = "analysis"}
 pipeline = {cmd = "mne_bids_pipeline --config pipeline-config.py {{ args }}", cwd = "analysis", depends-on = "epochdur", args = [{arg = "args", default = ""}]}
 
 [feature.stimgen]
-channels = ["conda-forge", "bioconda"]
-dependencies = { fitter = "*", music21 = "*" }
-pypi-dependencies = { cmudict = "*", syllables = "*" }
+channels = ["conda-forge"]
+dependencies = { music21 = "*" }
+pypi-dependencies = { cmudict = "*", fitter=">=1.6", syllables = "*" }
 
 [feature.stimgen.tasks]
 countsyllables = { cmd = "python characterize_corpus.py", cwd = "stimgen" }
