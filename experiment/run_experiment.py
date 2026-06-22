@@ -122,7 +122,6 @@ block_orders = (
     ["click_speech", "click_music", "imagine_music", "imagine_speech"],
     ["click_music", "click_speech", "imagine_music", "imagine_speech"],
     ["click_music", "click_speech", "imagine_speech", "imagine_music"],
-    [],  # for finale-only testing
 )
 block_mapping = {
     "1": "click_speech",
@@ -169,7 +168,7 @@ with ExperimentController(
                 f"(got {ec.session})"
             )
         if nonblocks := (items - set(block_mapping)):
-            raise ValueError("unrecognized block(s) requested in session: {nonblocks}")
+            raise ValueError(f"unrecognized block(s) requested in session: {nonblocks}")
         # at this point, we expect at least 2 digits, and they're unique and valid
         block_order = list()
         for char in ec.session:
@@ -179,9 +178,10 @@ with ExperimentController(
     print("\n" + "=" * 64)
     print(f"{block_order=}")
     print("=" * 64 + "\n")
-    # but if just running finale, make block_order empty (to skip data block loop)
-    if block_order == ["finale"]:
-        block_order = []
+    # keep track of if the finale was requested or not, but remove it from block_order
+    # so it's not part of the main loop
+    if want_finale := ("finale" in block_order):
+        block_order.remove("finale")
 
     # setup fixation dot. make it 2.5× bigger than default
     dot = FixationDot(ec)
@@ -238,7 +238,7 @@ with ExperimentController(
         for ix, stim_fname in enumerate(block["stims"], start=1):
             # load the audio file
             data, fs = read_wav(stim_file_dir / stim_folder / stim_fname)
-            assert int(fs) == 24414, "bad stimulus sampling frequency"
+            assert int(fs) == 24414, f"bad stimulus sampling frequency {fs}"
 
             # identify the trial
             sub_block = "practice" if practice else "real"
@@ -434,61 +434,62 @@ with ExperimentController(
             **instruction_kwargs,
         )
     # final block: calibrate the facial electrode responses
-    ec.screen_prompt(prompts["finale"].format(resp=resp), **instruction_kwargs)
-    ec.screen_prompt(
-        "Here we go!",
-        max_wait=block_start_delay,
-        live_keys=[],
-        wrap=False,
-        **instruction_kwargs,
-    )
-    subvoc_music = sorted((stim_file_dir / "subvoc_music").glob("*.wav"))
-    subvoc_speech = sorted((stim_file_dir / "subvoc_speech").glob("*.wav"))
-    stims_music = rng.permutation(subvoc_music)
-    stims_speech = rng.choice(subvoc_speech, size=len(subvoc_music), replace=False)
-    chunk = len(subvoc_music) // 3
-    interleaved = [
-        *stims_speech[:chunk],
-        *stims_music[:chunk],
-        *stims_speech[chunk : 2 * chunk],
-        *stims_music[chunk : 2 * chunk],
-        *stims_speech[2 * chunk :],
-        *stims_music[2 * chunk :],
-    ]
-    for ix, stim_path in enumerate(interleaved):
-        new_task = ""
-        # task instruction
-        if ix == 0:
-            new_task = "Listen quietly"
-        elif ix == 2 * chunk:
-            new_task = "Repeat quietly under your breath"
-        elif ix == 4 * chunk:
-            new_task = "Repeat out loud"
-        # pause to read instructions
-        if new_task:
-            ec.screen_text(new_task, **instruction_kwargs)
-            ec.flip()
-            ec.wait_secs(2.0)
-        # load file
-        data, fs = read_wav(stim_path)
-        assert int(fs) == 24414, "bad stimulus sampling frequency"
-        ec.load_buffer(data)
-        # play stimulus
-        trial_id = decimals_to_binary([trial_ids["finale"]], [4])
-        ec.identify_trial(ec_id=f"{stim_path.name}", ttl_id=trial_id)
-        stim_duration = data.shape[-1] / fs
-        t_stim_start = ec.start_stimulus(flip=False)
-        ec.wait_secs(stim_duration)
-        ec.stop()
-        ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
-        mult = 0.5 if stim_path in stims_music else 3.0
-        ec.wait_secs(mult * stim_duration + inter_trial_interval)
-        # logging
-        ec.write_data_line("block", value="finale")
-        ec.write_data_line("practice", value=False)
-        ec.write_data_line("stimulus", value=stim_path.name, timestamp=t_stim_start)
-        ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
-        ec.trial_ok()
+    if want_finale:
+        ec.screen_prompt(prompts["finale"].format(resp=resp), **instruction_kwargs)
+        ec.screen_prompt(
+            "Here we go!",
+            max_wait=block_start_delay,
+            live_keys=[],
+            wrap=False,
+            **instruction_kwargs,
+        )
+        subvoc_music = sorted((stim_file_dir / "subvoc_music").glob("*.wav"))
+        subvoc_speech = sorted((stim_file_dir / "subvoc_speech").glob("*.wav"))
+        stims_music = rng.permutation(subvoc_music)
+        stims_speech = rng.choice(subvoc_speech, size=len(subvoc_music), replace=False)
+        chunk = len(subvoc_music) // 3
+        interleaved = [
+            *stims_speech[:chunk],
+            *stims_music[:chunk],
+            *stims_speech[chunk : 2 * chunk],
+            *stims_music[chunk : 2 * chunk],
+            *stims_speech[2 * chunk :],
+            *stims_music[2 * chunk :],
+        ]
+        for ix, stim_path in enumerate(interleaved):
+            new_task = ""
+            # task instruction
+            if ix == 0:
+                new_task = "Listen quietly"
+            elif ix == 2 * chunk:
+                new_task = "Repeat quietly under your breath"
+            elif ix == 4 * chunk:
+                new_task = "Repeat out loud"
+            # pause to read instructions
+            if new_task:
+                ec.screen_text(new_task, **instruction_kwargs)
+                ec.flip()
+                ec.wait_secs(2.0)
+            # load file
+            data, fs = read_wav(stim_path)
+            assert int(fs) == 24414, "bad stimulus sampling frequency"
+            ec.load_buffer(data)
+            # play stimulus
+            trial_id = decimals_to_binary([trial_ids["finale"]], [4])
+            ec.identify_trial(ec_id=f"{stim_path.name}", ttl_id=trial_id)
+            stim_duration = data.shape[-1] / fs
+            t_stim_start = ec.start_stimulus(flip=False)
+            ec.wait_secs(stim_duration)
+            ec.stop()
+            ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
+            mult = 0.5 if stim_path in stims_music else 3.0
+            ec.wait_secs(mult * stim_duration + inter_trial_interval)
+            # logging
+            ec.write_data_line("block", value="finale")
+            ec.write_data_line("practice", value=False)
+            ec.write_data_line("stimulus", value=stim_path.name, timestamp=t_stim_start)
+            ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
+            ec.trial_ok()
 
     # end of experiment
     ec.screen_prompt(
