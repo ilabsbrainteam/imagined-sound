@@ -155,7 +155,7 @@ with ExperimentController(
 ) as ec:
     # all sessions requested, return in random(ish) order
     if ec.session == "0":
-        block_order = block_orders[datetime.now().microsecond % 4]
+        block_order = block_orders[datetime.now().microsecond % 4] + ["finale"]
     # custom blocks requested
     else:
         block_order = [block_mapping.get(ec.session)]  # single block
