@@ -139,7 +139,7 @@ print("Enter session = 2 to run music-click only")
 print("Enter session = 3 to run speech-imagine only")
 print("Enter session = 4 to run music-imagine only")
 print("Enter session = 5 to run finale only")
-print("Enter multiple digits 1-4 (no spaces) to run multiple blocks")
+print("Enter multiple digits 1-5 (no spaces) to run specific blocks")
 print("=" * 64 + "\n")
 
 # edit stim_db as needed for MEG Center
