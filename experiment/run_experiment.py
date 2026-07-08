@@ -1,6 +1,7 @@
 # Author: Daniel McCloy <dan@mccloy.info>
 #
 # License: BSD (3-clause)
+import logging
 import yaml
 
 from datetime import datetime
@@ -11,6 +12,8 @@ import numpy as np
 from expyfun import ExperimentController, decimals_to_binary
 from expyfun.stimuli import get_tdt_rates, read_wav
 from expyfun.visual import FixationDot
+
+logging.basicConfig(encoding="utf-8")
 
 # are we running in the MSR at the MEG center, or piloting elsewhere?
 msr = True
