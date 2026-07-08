@@ -183,10 +183,10 @@ with ExperimentController(
     if want_finale := ("finale" in block_order):
         block_order.remove("finale")
 
-    # setup fixation dot. make it 2.5× bigger than default
+    # setup fixation dot. make it 3.5× bigger than default
     dot = FixationDot(ec)
-    radius = dot._circles[0]._radius * 2.5 * font_multiplier
-    radius[1] = dot._circles[1]._radius[0] * 2.5 * font_multiplier
+    radius = dot._circles[0]._radius * 3.5 * font_multiplier
+    radius[1] = dot._circles[1]._radius[0] * 3.5 * font_multiplier
     dot.set_radii(radius, units="pix")
     dot.set_pos(center_offset)
     text_offset_below_dot = -0.1  # for "too fast/slow" feedback
