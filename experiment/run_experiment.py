@@ -526,7 +526,7 @@ with ExperimentController(
             ec.stop()
             ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
             since = check_for_pause(ec, since=since)
-            mult = 0.5 if stim_path in stims_music else 3.0
+            mult = 0.6 if stim_path in stims_music else 3.1
             ec.wait_secs(mult * stim_duration + inter_trial_interval)
             # logging
             ec.write_data_line("block", value="finale")
