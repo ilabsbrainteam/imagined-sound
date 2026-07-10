@@ -80,6 +80,29 @@ always = dict(font_name="DejaVu Sans", wrap=False)
 correct = dict(text="✔", color="w", **always)
 incorrect = dict(text="✘", color="k", **always)
 
+
+def do_pause(ec, press):
+    ec.screen_prompt(
+        "Experiment paused by operator. Press 'u' to resume.",
+        live_keys=["u"],
+        **instruction_kwargs,
+    )
+    ec.write_data_line(
+        "pause", value=f"pause ended at {ec.get_time()}", timestamp=press[1]
+    )
+
+
+def check_for_pause(ec, since):
+    # check for operator-triggered pause
+    presses = ec.get_presses(live_keys=["p"], timestamp=True, relative_to=since)
+    print("CHECKING FOR PAUSE")
+    print(ec._response_handler._keyboard_buffer)
+    print(presses)
+    if len(presses):
+        do_pause(ec, presses[-1])
+    return ec.get_time()
+
+
 # trigger map
 trial_ids = dict(
     real=0,
@@ -196,6 +219,7 @@ with ExperimentController(
 
     # welcome instructions
     ec.screen_prompt(prompts["welcome"].format(resp=resp), **instruction_kwargs)
+    since = ec.get_time()
 
     # loop over blocks
     for block_ix, block_name in enumerate(block_order, start=1):
@@ -237,8 +261,9 @@ with ExperimentController(
             wrap=False,
             **instruction_kwargs,
         )
-
+        since = ec.get_time()
         for ix, stim_fname in enumerate(block["stims"], start=1):
+            since = check_for_pause(ec, since=since)
             # load the audio file
             data, fs = read_wav(stim_file_dir / stim_folder / stim_fname)
             assert int(fs) == 24414, f"bad stimulus sampling frequency {fs}"
@@ -277,10 +302,14 @@ with ExperimentController(
 
             # check for buttonpress during pre-response delay (so we know the
             # "do-nothing" period isn't contaminated by motor activity)
+            since = check_for_pause(ec, since=since)
             pressed, t_press = ec.wait_one_press(
-                max_wait=pre_response_delay, timestamp=True
+                max_wait=pre_response_delay, timestamp=True, live_keys=live_keys
             )
-            if pressed:
+            if pressed == "p":
+                # pause, and skip the rest of the response period
+                do_pause(ec, (pressed, t_press))
+            elif pressed:
                 # they responded too quickly; maybe give feedback
                 t_response_start = t_response_end = np.nan
                 if practice:
@@ -312,15 +341,20 @@ with ExperimentController(
                 ec.stamp_triggers(
                     trial_ids["response_start"], check="int4", wait_for_last=False
                 )
-                pressed, t_press = ec.wait_one_press(max_wait=max_wait)
-                if t_press:
+                since = check_for_pause(ec, since=since)
+                pressed, t_press = ec.wait_one_press(
+                    max_wait=max_wait, live_keys=live_keys
+                )
+                if pressed == "p":
+                    do_pause(ec, (pressed, t_press))
+                    t_response_end = ec.get_time()
+                elif t_press:
                     t_response_end = t_response_start + t_press
                 else:
                     t_response_end = ec.get_time()
                 ec.stamp_triggers(
                     trial_ids["response_end"], check="int4", wait_for_last=True
                 )
-
                 # feedback
                 if practice:
                     if pressed:
@@ -382,9 +416,13 @@ with ExperimentController(
                 ec.flip()
                 ec.wait_secs(attn_check_delay)
                 test_start = ec.start_stimulus(start_of_trial=False, flip=False)
+                since = check_for_pause(ec, since=since)
                 attn_press, attn_time = ec.wait_one_press(
-                    live_keys=live_keys, timestamp=True, min_wait=stim_duration
+                    live_keys=live_keys, min_wait=stim_duration
                 )
+                if attn_press == "p":
+                    do_pause(ec, (attn_press, attn_time))
+                since = ec.get_time()
                 ec.stop()
                 # True if pressed Y & it was real, or if pressed N & it was fake
                 correct_response = (attn_press.lower() == yes) != fake
@@ -406,6 +444,7 @@ with ExperimentController(
                 ec.write_data_line(
                     "attn_correct", value=correct_response, timestamp=attn_time
                 )
+                since = check_for_pause(ec, since=since)
 
             # transition from "practice" to "real"
             if ix == n_practice_trials:
@@ -481,10 +520,12 @@ with ExperimentController(
             trial_id = decimals_to_binary([trial_ids["finale"]], [4])
             ec.identify_trial(ec_id=f"{stim_path.name}", ttl_id=trial_id)
             stim_duration = data.shape[-1] / fs
+            since = check_for_pause(ec, since=since)
             t_stim_start = ec.start_stimulus(flip=False)
             ec.wait_secs(stim_duration)
             ec.stop()
             ec.stamp_triggers(trial_ids["stim_stop"], check="int4", wait_for_last=False)
+            since = check_for_pause(ec, since=since)
             mult = 0.5 if stim_path in stims_music else 3.0
             ec.wait_secs(mult * stim_duration + inter_trial_interval)
             # logging
@@ -493,6 +534,7 @@ with ExperimentController(
             ec.write_data_line("stimulus", value=stim_path.name, timestamp=t_stim_start)
             ec.write_data_line("stimulus", value="duration", timestamp=stim_duration)
             ec.trial_ok()
+            check_for_pause(ec, since=since)
 
     # end of experiment
     ec.screen_prompt(
