@@ -3,6 +3,7 @@ welcome: |
   Soon, you will hear some sounds, and will be asked to do different things in response to those sounds.
   Sometimes the sounds will be music, sometimes people speaking.
   The sounds are grouped into blocks; each block will have different instructions for what to do when each sound finishes.
+  Each block begins with a few practice trials, after which the trials come in batches of 10 with breaks in between each batch.
   Press any {resp} to see the instructions for the first block.
 click_speech: |
   In this block, you will hear sentences.
@@ -14,13 +15,13 @@ click_speech_practice: |
 imagine_speech: |
   In this block, you will hear sentences.
   After the sentence ends, imagine that you are hearing the sentence again (but do not repeat it out loud),
-  and press the response button when you are finished imagining the sentence.
+  and press the response button as soon as you are finished imagining the sentence.
   The fixation circle will not change color.
   Usually, after a brief delay the next trial will start automatically,
   but some trials will have yes/no questions after them before the next trial starts.
 imagine_speech_practice: |
   don't wait for the circle to change color (it won't).
-  When the sentence ends, imagine hearing the sentence again, then press the button when finished.
+  When the sentence ends, imagine hearing the sentence again, then press the button as soon as you are finished imagining.
 click_music: |
   In this block, you will hear music.
   After the music ends, there will be a short delay and then the fixation circle will change color.
@@ -31,12 +32,12 @@ click_music_practice: |
 imagine_music: |
   In this block, you will hear music.
   After the music ends, imagine that you are hearing the music again (but do not sing or hum it out loud),
-  and press the response button when you are finished imagining the music.
+  and press the response button as soon as you are finished imagining the music.
   Usually, after a brief delay the next trial will start automatically,
   but some trials will have yes/no questions after them before the next trial starts.
 imagine_music_practice: |
   don't wait for the circle to change color (it won't).
-  When the music ends, imagine hearing the music again, then press the button when finished.
+  When the music ends, imagine hearing the music again, then press the button as soon as you are finished imagining.
 finale: |
   Just one more quick task!
   You'll hear a few more sounds, and we'll ask you to either listen quietly, repeat quietly under your breath, or repeat out loud.
