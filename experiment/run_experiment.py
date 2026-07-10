@@ -487,26 +487,26 @@ with ExperimentController(
         )
         subvoc_music = sorted((stim_file_dir / "subvoc_music").glob("*.wav"))
         subvoc_speech = sorted((stim_file_dir / "subvoc_speech").glob("*.wav"))
+        speech_chunk = len(subvoc_music) // 2
+        music_chunk = len(subvoc_music) // 2
         stims_music = rng.permutation(subvoc_music)
-        stims_speech = rng.choice(subvoc_speech, size=len(subvoc_music), replace=False)
-        chunk = len(subvoc_music) // 3
+        stims_speech = rng.choice(subvoc_speech, size=3 * speech_chunk, replace=False)
         interleaved = [
-            *stims_speech[:chunk],
-            *stims_music[:chunk],
-            *stims_speech[chunk : 2 * chunk],
-            *stims_music[chunk : 2 * chunk],
-            *stims_speech[2 * chunk :],
-            *stims_music[2 * chunk :],
+            *stims_speech[:speech_chunk],
+            *stims_music[:music_chunk],
+            *stims_speech[speech_chunk : 2 * speech_chunk],
+            *stims_music[music_chunk:],
+            *stims_speech[2 * speech_chunk :],
         ]
         for ix, stim_path in enumerate(interleaved):
             new_task = ""
             # task instruction
             if ix == 0:
                 new_task = "Listen quietly"
-            elif ix == 2 * chunk:
+            elif ix == speech_chunk + music_chunk:
                 new_task = "Repeat quietly under your breath"
-            elif ix == 4 * chunk:
-                new_task = "Repeat out loud"
+            elif ix == 2 * speech_chunk + music_chunk:
+                new_task = "Repeat out loud (hum or speak)"
             # pause to read instructions
             if new_task:
                 ec.screen_text(new_task, **instruction_kwargs)
