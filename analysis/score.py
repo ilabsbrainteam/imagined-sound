@@ -6,13 +6,7 @@ from expyfun import binary_to_decimals
 from expyfun.io import read_tab
 
 # trigger dict
-TRIGGERS = {
-    (4, 4): 2,  # "id_trial",
-    (4, 8): 3,  # "stim_end",
-    (8, 4): 5,  # "resp_start",
-    (8, 8): 7,  # "resp_end",
-}
-STIM_CHANNELS_OLD_TRIGGERS = dict(
+STIM_CHANNELS = dict(
     stim_start="STI001",
     _zeros="STI003",  # used for
     _ones="STI004",  # binary-encoded trial info
@@ -21,26 +15,9 @@ STIM_CHANNELS_OLD_TRIGGERS = dict(
     button_3="STI007",
     button_4="STI008",
 )
-STIM_CHANNELS_NEW_TRIGGERS = dict(
-    stim_start="STI001",
-    _zeros="STI003",  # used for
-    _ones="STI004",  # binary-encoded trial info
-    button_1="STI005",
-    button_2="STI006",
-)
-EVENT_DICT_OLD_TRIGGERS = dict(
-    stim_start=1,
-    id_trial=2,
-    stim_end=3,
-    resp_start=5,
-    resp_end=7,
-    button_1=301,
-    button_2=302,
-    button_3=303,
-    button_4=304,
-)
-EVENT_DICT_NEW_TRIGGERS = {
+EVENT_DICT = {
     "stim_start": 1,
+    "attn_check_start": 3,
     "speech/click": 4,
     "speech/imagine": 8,
     "music/click": 6,
@@ -52,19 +29,16 @@ EVENT_DICT_NEW_TRIGGERS = {
     "stim_end": 12,
     "resp_start": 13,
     "resp_end": 14,
+    "finale": 15,
     "button_1": 16,
     "button_2": 32,
-    "unknown_2": 2,
-    "unknown_15": 15,
+    "button_3": 64,
+    "button_4": 128,
 }
 # differentiate all the "stim_end" events & event_ids by condition
-trial_id_names = [
-    x for x in list(EVENT_DICT_NEW_TRIGGERS) if x.endswith(("click", "imagine"))
-]
-EVENT_DICT_NEW_TRIGGERS.update(
-    {f"stim_end/{x}": 100 + EVENT_DICT_NEW_TRIGGERS[x] for x in trial_id_names}
-)
-REV_EV_DICT_NEW = {v: k for k, v in EVENT_DICT_NEW_TRIGGERS.items()}
+trial_id_names = [x for x in list(EVENT_DICT) if x.endswith(("click", "imagine"))]
+EVENT_DICT.update({f"{x}/stim_end": 200 + EVENT_DICT[x] for x in trial_id_names})
+REV_EVENT_DICT = {v: k for k, v in EVENT_DICT.items()}
 
 
 def _stack_and_sort_arrays(*arrays):
@@ -82,8 +56,11 @@ def parse_expyfun_log(tabpath):
             practice=trial["practice"][0][0],
             stim=trial["stimulus"][0][0],
             stim_onset=trial["play"][0][1],
-            reaction_time=trial["response"][2][1],
         )
+        if trial["response"]:
+            _row["reaction_time"] = trial["response"][2][1]
+        else:
+            _row["reaction_time"] = pd.NA
         for key in ("attn_keyword", "attn_correct", "attn_is_fake"):
             if trial.get(key):
                 val = trial[key][0][0]
@@ -100,114 +77,82 @@ def parse_expyfun_log(tabpath):
     return pd.DataFrame(df_list)
 
 
-def score_func_old_triggers(raw, stim_type=None):
-    # extract button presses and stim-start events separately
-    event_arrays = {
-        event_kind: mne.find_events(raw, shortest_event=1, stim_channel=stim_ch)
-        for event_kind, stim_ch in STIM_CHANNELS_OLD_TRIGGERS.items()
-    }
-    # give each event type its unique integer value
-    offset = {None: 0, "speech": 100, "music": 200}
-    for key, val in (EVENT_DICT_OLD_TRIGGERS | dict(_zeros=4, _ones=8)).items():
-        if key in event_arrays:
-            newval = val + offset[stim_type] if key == "stim_start" else val
-            event_arrays[key][:, -1] = newval
-
-    # interpret the 4's and 8's as binary codes
-    binary_codes = _stack_and_sort_arrays(event_arrays["_zeros"], event_arrays["_ones"])
-    # assemble into recoded events array
-    other_trial_events = list()
-    for first, second in zip(binary_codes[::2], binary_codes[1::2]):
-        couplet = np.vstack((first, second))
-        _event = tuple(couplet[:, -1])
-        new_event_code = TRIGGERS[_event]
-        other_trial_events.append(np.array([*first[:2], new_event_code]))
-
-    # assemble the final events array
-    clean_events = _stack_and_sort_arrays(
-        *[
-            val
-            for key, val in event_arrays.items()
-            if key == "stim_start" or key.startswith("button_")
-        ],
-        other_trial_events,
-    )
-
-    # remap event values based on stim type and block
-    stim_idx = np.nonzero(np.isin(clean_events[:, -1], (101, 201)))[0]
-    for ix, span in enumerate(np.array_split(clean_events, stim_idx, axis=0)):
-        # all spans except the first one should start with a stim trigger (event ID 101 or 201)
-        if ix == 0:
-            continue
-        ids_to_change = [
-            EVENT_DICT_OLD_TRIGGERS[key]
-            for key in ("stim_end", "resp_start", "resp_end")
-        ]
-        rows_to_change = np.isin(span[:, -1], ids_to_change)
-        stim_offset = span[0, -1] - EVENT_DICT_OLD_TRIGGERS["stim_start"]
-        span[rows_to_change, -1] += stim_offset
-        if stim_type is not None:
-            rows_to_change[0] = True  # adjust stim_start too
-            block_transition = dict(speech=98, music=60)[stim_type]
-            block_offset = 10 if ix < block_transition else 20
-            span[rows_to_change] += block_offset
-    return clean_events
-
-
 def score_func_new_triggers(raw, stim_type=None):
     # extract button presses and stim-start events separately
-    button_1_events = mne.find_events(
-        raw, stim_channel=STIM_CHANNELS_NEW_TRIGGERS["button_1"]
-    )
-    button_2_events = mne.find_events(
-        raw, stim_channel=STIM_CHANNELS_NEW_TRIGGERS["button_2"]
-    )
-    button_1_events[:, -1] = EVENT_DICT_NEW_TRIGGERS["button_1"]
-    button_2_events[:, -1] = EVENT_DICT_NEW_TRIGGERS["button_2"]
+    button_1_events = mne.find_events(raw, stim_channel=STIM_CHANNELS["button_1"])
+    button_2_events = mne.find_events(raw, stim_channel=STIM_CHANNELS["button_2"])
+    button_3_events = mne.find_events(raw, stim_channel=STIM_CHANNELS["button_3"])
+    button_4_events = mne.find_events(raw, stim_channel=STIM_CHANNELS["button_4"])
+    button_1_events[:, -1] = EVENT_DICT["button_1"]
+    button_2_events[:, -1] = EVENT_DICT["button_2"]
+    button_3_events[:, -1] = EVENT_DICT["button_3"]
+    button_4_events[:, -1] = EVENT_DICT["button_4"]
+    mask = sum(EVENT_DICT[f"button_{n}"] for n in (1, 2, 3, 4))
     trial_events = mne.find_events(
         raw,
         shortest_event=1,
-        mask=EVENT_DICT_NEW_TRIGGERS["button_1"],
+        mask=mask,
         mask_type="not_and",
     )
     # parse trial ID events (sequence of four 4s or 8s)
     new_trial_events = list()
     ixs = list(range(trial_events.shape[0]))
+    # iterate over rows with a 1-trigger (stim start events)
+    for row_ix in np.nonzero(trial_events[:, -1] == 1)[0]:
+        trial_id = trial_events[(row_ix - 4) : row_ix, -1]
+        # ↓ there are stim start triggers for "check" stims which don't have a preceding
+        # 4-bit trial ID sequence, so don't keep those (yet)
+        if all(x in (4, 8) for x in trial_id):
+            bits = trial_id // 4 - 1
+            new_trial_events.append(
+                np.concat(
+                    (
+                        trial_events[row_ix][:2],
+                        [binary_to_decimals(bits, n_bits=4).item()],
+                    ),
+                )
+            )
+    new_trial_events = np.array(new_trial_events)
+    # now get all the non-stim-start rows. Go backwards to simplify skipping 4-bit
+    # sequences that precede stim starts
+    more_trial_events = list()
+    unexpected_events = list()
     skip_next_row = 0
-    for row in ixs:
+    for row_ix in ixs[::-1]:
         if skip_next_row:
             skip_next_row -= 1
             continue
-        if trial_events[row, -1] not in (4, 8):
-            new_trial_events.append(trial_events[row])
-            skip_next_row = 0
+        # skip stim_start rows and their associated 4-bit trial IDs
+        if (
+            trial_events[row_ix, 0] in new_trial_events[:, 0]
+            and trial_events[row_ix, -1] == 1
+            and all(x in (4, 8) for x in trial_events[(row_ix - 4) : row_ix, -1])
+        ):
+            skip_next_row += 4
+            continue
+        # handle stim_start for attention-check stims
+        if trial_events[row_ix, -1] == 1:
+            more_trial_events.append(np.concat((trial_events[row_ix][:2], [3])))
+        # handle stim_stop, response_start, response_end
+        elif trial_events[row_ix, -1] in (12, 13, 14):
+            more_trial_events.append(trial_events[row_ix])
         else:
-            trial_id = trial_events[row : (row + 5), -1]
-            if all(x in (4, 8) for x in trial_id[:4]) and trial_id[4] == 1:
-                trial_id = trial_id[:4]  # strip the stim-start trigger
-                bits = trial_id // 4 - 1
-                new_trial_events.append(
-                    np.concat(
-                        (
-                            trial_events[row][:2],
-                            [binary_to_decimals(bits, n_bits=4).item()],
-                        ),
-                    )
-                )
-                skip_next_row = 3
-            else:
-                print(f"BADNESS unexpected trial ID {trial_id}")
-    new_trial_events = np.array(new_trial_events)
+            unexpected_events.append(trial_events[row_ix])
+    if unexpected_events:
+        print(f"BADNESS unexpected event IDs: {unexpected_events}")
 
     # mutate stim_end events to reflect trial type (for condition epoching)
-    # (stim_end → stim_end/practice/music/click)
+    # (e.g., stim_end → practice/music/click/stim_end)
     for row in new_trial_events:
-        if REV_EV_DICT_NEW[row[-1]] in trial_id_names:
-            trial_id = REV_EV_DICT_NEW[row[-1]]
-        elif REV_EV_DICT_NEW[row[-1]] == "stim_end":
-            row[-1] = EVENT_DICT_NEW_TRIGGERS[f"stim_end/{trial_id}"]
+        if REV_EVENT_DICT.get(row[-1]) == "stim_end":
+            row[-1] = EVENT_DICT[f"{trial_id}/stim_end"]
 
     clean_events = _stack_and_sort_arrays(
-        button_1_events, button_2_events, new_trial_events
+        new_trial_events,
+        more_trial_events,
+        button_1_events,
+        button_2_events,
+        button_3_events,
+        button_4_events,
     )
     return clean_events

@@ -117,16 +117,15 @@ trial_ids = dict(
     response_end=14,
     finale=15,
 )
-# real speech click → 4   (4, 8, 4, 4)
-# real speech imag  → 8   (8, 4, 4, 4)
-# real music click  → 6   (4, 8, 8, 4)
-# real music imag   → 10  (8, 4, 8, 4)
-# prac speech click → 5   (4, 8, 4, 8)
-# prac speech imag  → 9   (8, 4, 4, 8)
-# prac music click  → 7   (4, 8, 8, 8)
-# prac music imag   → 11  (8, 4, 8, 8)
-#
-# 2, 3 available for other uses
+# real speech click  → 4   (4, 8, 4, 4)
+# real speech imag   → 8   (8, 4, 4, 4)
+# real music click   → 6   (4, 8, 8, 4)
+# real music imag    → 10  (8, 4, 8, 4)
+# prac speech click  → 5   (4, 8, 4, 8)
+# prac speech imag   → 9   (8, 4, 4, 8)
+# prac music click   → 7   (4, 8, 8, 8)
+# prac music imag    → 11  (8, 4, 8, 8)
+# attnchk stim_start → 3   (converted from 1 in score.py)
 
 # gather up all the bits that differ between blocks
 blocks = {
