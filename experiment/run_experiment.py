@@ -47,7 +47,8 @@ with open("prompts.yaml") as fid:
     prompts = yaml.safe_load(fid)
 prompts = {k: " ".join(v.strip().split("\n")) for k, v in prompts.items()}
 resp = "button" if msr else "key"
-paktc = f" Press any {resp} to continue."
+respident = "blue" if msr else "1"
+paktc = f" Press the {respident} {resp} to continue."
 
 # load stimulus lists
 with open("block_stims.yaml") as fid:
