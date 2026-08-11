@@ -2,13 +2,11 @@
 #
 # License: BSD (3-clause)
 import logging
-import yaml
-
 from datetime import datetime
 from pathlib import Path
 
 import numpy as np
-
+import yaml
 from expyfun import ExperimentController, decimals_to_binary
 from expyfun.stimuli import get_tdt_rates, read_wav
 from expyfun.visual import FixationDot

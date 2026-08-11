@@ -1,7 +1,6 @@
 import mne
 import numpy as np
 import pandas as pd
-
 from expyfun import binary_to_decimals
 from expyfun.io import read_tab
 

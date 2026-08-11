@@ -1,13 +1,12 @@
 """Create BIDS folder structure for "prism" data."""
 
 import re
-import yaml
-
 from pathlib import Path
 from warnings import filterwarnings
 
 import mne
 import numpy as np
+import yaml
 from mne_bids import (
     BIDSPath,
     get_anat_landmarks,
@@ -17,13 +16,11 @@ from mne_bids import (
     write_meg_crosstalk,
     write_raw_bids,
 )
-
 from score import (
     EVENT_DICT,
     parse_expyfun_log,
     score_func_new_triggers,
 )
-
 
 EVENT_DICT_DEFAULT = {
     "BAD boundary": 999,
