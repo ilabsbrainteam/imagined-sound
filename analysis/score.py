@@ -76,7 +76,7 @@ def parse_expyfun_log(tabpath):
     return pd.DataFrame(df_list)
 
 
-def score_func_new_triggers(raw, stim_type=None):
+def score_func(raw):
     # extract button presses and stim-start events separately
     button_1_events = mne.find_events(raw, stim_channel=STIM_CHANNELS["button_1"])
     button_2_events = mne.find_events(raw, stim_channel=STIM_CHANNELS["button_2"])
