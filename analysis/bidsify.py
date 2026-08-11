@@ -83,6 +83,7 @@ for data_folder in orig_data.rglob("*/*/"):
     if not data_folder_pattern.match(str(_dirpath)):
         print(f"skipping folder {_dirpath}")
         continue
+    print(f"processing folder {_dirpath}")
     session = _dirpath.parts[-1]
     # final pilot
     EVENT_DICT |= EVENT_DICT_DEFAULT
@@ -119,7 +120,21 @@ for data_folder in orig_data.rglob("*/*/"):
     raw = mne.io.read_raw_fif(rawpath, **read_raw_kw)
     erm = mne.io.read_raw_fif(ermpath, **read_raw_kw)
     # extract events
-    events = score_func(raw=raw)
+    events, unexpected_events = score_func(raw=raw)
+    if len(unexpected_events):
+        # add & reorder columns
+        unexpected_events["sub"] = subj
+        unexpected_events["sess"] = session
+        unexpected_events["kind"] = "unexpected event trigger"
+        unexpected_events = unexpected_events[
+            ["sub", "sess", "kind", "sample_number", "prior_sample_value", "event_id"]
+        ]
+        bids_path.fpath.parents[1].mkdir(exist_ok=True, parents=True)
+        unexpected_events.to_csv(
+            bids_path.fpath.parents[1] / "sessions.tsv",
+            sep="\t",
+            index=False,
+        )
     # parse logfile
     df = parse_expyfun_log(tabpath=tabpath)
     # write raw

@@ -138,7 +138,12 @@ def score_func(raw):
         else:
             unexpected_events.append(trial_events[row_ix])
     if unexpected_events:
-        print(f"BADNESS unexpected event IDs: {unexpected_events}")
+        unexpected_events = pd.DataFrame(
+            unexpected_events,
+            columns=["sample_number", "prior_sample_value", "event_id"],
+        )
+        print("WARNING: unexpected event IDs:")
+        print(unexpected_events)
 
     # mutate stim_end events to reflect trial type (for condition epoching)
     # (e.g., stim_end → practice/music/click/stim_end)
@@ -154,4 +159,4 @@ def score_func(raw):
         button_3_events,
         button_4_events,
     )
-    return clean_events
+    return clean_events, unexpected_events
