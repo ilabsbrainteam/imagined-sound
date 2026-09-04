@@ -59,16 +59,12 @@ bids_path = BIDSPath(
 )
 
 # filename patterns
-data_folder_pattern = re.compile(r"prism_\d+/\d+")
+data_folder_pattern = re.compile(r"prism_1\d\d/\d+")  # omit 9xx subj numbers (pilots)
 rec_pattern = re.compile(r"prism_(?P<subj>\w+)_(?P<run>\d+)_raw.fif")
-# rec_pattern = re.compile(r"prism_(?P<subj>\w+)_(?P<task>\w+)_(?P<run>\d+)_raw.fif")
 erm_pattern = re.compile(r"prism_(?P<subj>\w+)_erm_raw.fif")
 tab_pattern = re.compile(
-    r"(?P<subj>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
+    r"prism_(?P<subj>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
 )
-# tab_pattern = re.compile(
-#     r"prism_(?P<subj>\w+)_(?P<task>\w+)_\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}(?:\.\d{6})?.tab"
-# )
 
 # task dict
 task_dict = dict(
