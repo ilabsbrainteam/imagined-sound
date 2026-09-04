@@ -8,14 +8,13 @@ import pandas as pd
 from annotated_types import Ge, Interval, Len, MinLen
 from mne import Covariance
 from mne_bids import BIDSPath
-from yaml import safe_load
-
 from mne_bids_pipeline.typing import (
     ArbitraryContrast,
     DigMontageType,
     FloatArrayLike,
     PathLike,
 )
+from yaml import safe_load
 
 root: PathLike = Path("/data/prism")
 
@@ -149,7 +148,7 @@ The BIDS `recording` entity.
 The BIDS `space` entity.
 """
 
-subjects: Sequence[str] | Literal["all"] = ["cz"]  # "all"
+subjects: Sequence[str] | Literal["all"] = "all"
 """
 Subjects to analyze. If `'all'`, include all subjects. To only
 include a subset of subjects, pass a list of their identifiers. Even
@@ -412,7 +411,7 @@ preprocessing stage itself, nor to the source analysis stage.
     ```
 """
 
-reader_extra_params: dict = dict(allow_maxshield=True)
+reader_extra_params: dict = dict(allow_maxshield="yes")
 """
 Parameters to be passed to `read_raw_bids()` calls when importing raw data.
 
@@ -851,7 +850,7 @@ The low-frequency cut-off in the highpass filtering step.
 Keep it `None` if no highpass filtering should be applied.
 """
 
-h_freq: float | None = 50.0
+h_freq: float | None = 100.0
 """
 The high-frequency cut-off in the lowpass filtering step.
 Keep it `None` if no lowpass filtering should be applied.
@@ -900,13 +899,13 @@ Specifies the transition bandwidth of the notch filter. The default is `1.`.
 Specifies the width of each stop band. `None` uses the MNE default.
 """
 
-# zapline_fline: float | None = None
+zapline_fline: float | None = 60
 """
 Specifies frequency to remove using Zapline filtering. If None, zapline will not
 be used.
 """
 
-# zapline_iter: bool = False
+zapline_iter: bool = True
 """
 Specifies if the iterative version of the Zapline algorithm should be run.
 """
@@ -1106,7 +1105,7 @@ conditions: Sequence[str] | dict[str, str] | None = [
     "stim_end/music/click",
     "stim_end/music/imagine",
     "stim_end/speech/click",
-    # "stim_end/speech/imagine",  # MISSING FROM PILOT #3; RESTORE FOR SUBSEQUENT: TODO
+    "stim_end/speech/imagine",
 ]
 """
 The time-locked events based on which to create evoked responses.
