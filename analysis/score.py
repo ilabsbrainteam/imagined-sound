@@ -87,7 +87,8 @@ def score_func(raw):
     button_2_events[:, -1] = EVENT_DICT["button_2"]
     button_3_events[:, -1] = EVENT_DICT["button_3"]
     button_4_events[:, -1] = EVENT_DICT["button_4"]
-    mask = sum(EVENT_DICT[f"button_{n}"] for n in (1, 2, 3, 4))
+    # 1024 is video sync pulses on STI011
+    mask = sum(EVENT_DICT[f"button_{n}"] for n in (1, 2, 3, 4)) + 1024
     trial_events = mne.find_events(
         raw,
         shortest_event=1,
