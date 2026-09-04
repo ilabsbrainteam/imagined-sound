@@ -14,7 +14,7 @@ STIM_CHANNELS = dict(
     button_3="STI007",
     button_4="STI008",
 )
-EVENT_DICT = {
+_EVENT_DICT = {
     "stim_start": 1,
     "attn_check_start": 3,
     "speech/click": 4,
@@ -35,9 +35,10 @@ EVENT_DICT = {
     "button_4": 128,
 }
 # differentiate all the "stim_end" events & event_ids by condition
-trial_id_names = [x for x in list(EVENT_DICT) if x.endswith(("click", "imagine"))]
-EVENT_DICT.update({f"{x}/stim_end": 200 + EVENT_DICT[x] for x in trial_id_names})
-REV_EVENT_DICT = {v: k for k, v in EVENT_DICT.items()}
+trial_id_names = [x for x in list(_EVENT_DICT) if x.endswith(("click", "imagine"))]
+_EVENT_DICT.update({f"{x}/stim_end": 200 + _EVENT_DICT[x] for x in trial_id_names})
+EVENT_DICT = _EVENT_DICT.copy()  # for import to other files, after updating
+REV_EVENT_DICT = {v: k for k, v in _EVENT_DICT.items()}
 
 
 def _stack_and_sort_arrays(*arrays):
