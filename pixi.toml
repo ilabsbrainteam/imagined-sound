@@ -7,7 +7,6 @@ version = "0.1.0"
 
 [dependencies]
 ipython = "*"
-mne = "*"
 numpy = ">=2,<3"
 pyyaml = ">=6.0.3,<7"
 
@@ -21,7 +20,7 @@ stimgen = ["stimgen"]
 
 [feature.experiment]
 platforms = ["linux-64", "win-64"]
-dependencies = { ffmpeg = "<8", scp = "*" }
+dependencies = { ffmpeg = "<8", scp = "*", mne = "*" }
 
 [feature.experiment.pypi-dependencies]
 expyfun = { git = "https://github.com/LABSN/expyfun.git", rev = "2570c72", extras = ["all"] }
@@ -39,7 +38,8 @@ rsyncstims = {cmd = "rsync -rtuv kasga:/data06/dan/stimuli .", cwd = "experiment
 platforms = ["linux-64"]
 
 [feature.analysis.pypi-dependencies]
-mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "18af7ca" }
+mne = { git = "https://github.com/mne-tools/mne-python.git", rev = "277fd531bb1e541e0596068a40314813cca57559", extras=["full"] }
+mne-bids-pipeline = { git = "https://github.com/mne-tools/mne-bids-pipeline.git", rev = "91c2e0677f4a015a35dad48c2faa5e47633ae497" }
 
 [feature.analysis.tasks]
 bidsify = {cmd = "python bidsify.py", cwd = "analysis"}
