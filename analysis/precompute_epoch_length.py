@@ -3,10 +3,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from yaml import safe_dump
-
 from mne_bids import find_matching_paths, get_entities_from_fname
-
+from yaml import safe_dump
 
 root = Path("/data/prism")
 bids_root = root / "bids-data"
@@ -28,30 +26,29 @@ for ev_file in event_files:
     # load the events data from the BIDS tree and assign trial numbers
     # trial -1 is assigned to all events prior to the first stimulus
     df = pd.read_csv(ev_file, sep="\t")
-    # avoid doing this if already done
-    if "trial_num" not in df.columns:
-        # assign trial numbers
-        df["trial_num"] = pd.array(
-            (df["trial_type"].str.startswith(("practice", "speech", "music"))).cumsum(),
-            dtype=pd.Int64Dtype(),
-        )
-        # fixup for spurious triggers
-        df["spurious_trial"] = df.groupby("trial_num")["trial_type"].transform(
-            lambda x: ~(x.str.startswith("stim_end").any())
-        )
-        df.loc[df["spurious_trial"], "trial_num"] = pd.NA
-        # all the spurious triggers come mid-trial, so ffill (not bfill)
-        df["trial_num"] = df["trial_num"].ffill()
-        # handle the initial button-presses from start-of-experiment instructions
-        df["trial_num"] = df["trial_num"].fillna(-1)
-        # now fixup the trial numbers to be sequential
-        df["trial_num"] = (
-            df["trial_num"] != df["trial_num"].shift(periods=1, fill_value=-1)
-        ).cumsum() - 1
-        # cleanup and write to disk
-        df.drop(columns=["spurious_trial"], inplace=True)
-        df.reset_index(drop=True, inplace=True)
-        df.to_csv(ev_file, sep="\t", index=False)
+    # assign trial numbers
+    trial_start_indicators = ("practice", "speech", "music", "finale")
+    df["trial_num"] = pd.array(
+        df["trial_type"].str.startswith(trial_start_indicators).cumsum(),
+        dtype=pd.Int64Dtype(),
+    )
+    # fixup for spurious triggers
+    df["spurious_trial"] = df.groupby("trial_num")["trial_type"].transform(
+        lambda x: ~(x.str.startswith("stim_end").any())
+    )
+    df.loc[df["spurious_trial"], "trial_num"] = pd.NA
+    # all the spurious triggers come mid-trial, so ffill (not bfill)
+    df["trial_num"] = df["trial_num"].ffill()
+    # handle the initial button-presses from start-of-experiment instructions
+    df["trial_num"] = df["trial_num"].fillna(-1)
+    # now fixup the trial numbers to be sequential
+    df["trial_num"] = (
+        df["trial_num"] != df["trial_num"].shift(periods=1, fill_value=-1)
+    ).cumsum() - 1
+    # cleanup and write to disk
+    df.drop(columns=["spurious_trial"], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    df.to_csv(ev_file, sep="\t", index=False)
 
     # minus 1 here because of "trial# -1" ↓↓↓ (button presses preceding first trial)
     assert df["trial_num"].unique().size - 1 == trial_data.shape[0], (
