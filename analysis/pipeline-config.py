@@ -77,13 +77,13 @@ window.
     Enabling interactive mode deactivates parallel processing.
 """
 
-sessions: list[str] | Literal["all"] = ["260206"]
+sessions: list[str] | Literal["all"] = "all"
 """
 The sessions to process. If `'all'`, will process all sessions found in the
 BIDS dataset.
 """
 
-# allow_missing_sessions: bool = False
+allow_missing_sessions: bool = True
 """
 Whether to continue processing the dataset if some combinations of `subjects` and
 `sessions` are missing.
