@@ -783,7 +783,7 @@ The window to use during cHPI coil amplitude estimation and in cHPI filtering.
 Can be "auto" to autodetect a reasonable value or a float (in seconds).
 """
 
-# mf_mc_gof_limit: float = 0.98
+mf_mc_gof_limit: float = 0.95
 """
 Minimum goodness of fit to accept for each cHPI coil.
 """
@@ -2405,7 +2405,7 @@ the joblib.Memory class for more information."""
 #
 # These options control parallel processing (e.g., multiple subjects at once),
 
-n_jobs: int = 6
+n_jobs: int = 4
 """
 Specifies how many subjects you want to process in parallel. If `1`, disables
 parallel processing.
@@ -2458,6 +2458,40 @@ Set the pipeline logging verbosity.
 Set the MNE-Python logging verbosity.
 """
 
+# read_raw_bids_verbose: Literal["info", "warning", "error"] | None = None
+"""
+Verbosity level to pass to `read_raw_bids(..., verbose=read_raw_bids_verbose)`.
+If you know your dataset will contain files that are not perfectly BIDS
+compliant (e.g., "Did not find any meg.json..."), you can set this to
+`'error'` to suppress warnings emitted by read_raw_bids.
+"""
+
+ignore_warnings: Sequence[str] = (
+    "Found cal channel not in data:",
+    "Not all cross-talk channels in raw:",
+)
+r"""
+A list of message strings to ignore during execution. This gives you
+finer-grained control over warnings to suppress during `read_raw_bids`,
+fitting sphere to headshape, etc. Each string is treated as a regular expression,
+and for convenience, they will be used with additional regex added at each end like:
+```
+warnings.ignorewarnings("ignore", message=rf"[\S\s]*{msg}[\S\s]*")
+```
+
+???+ example "Example"
+    Suppressing warnings for ds000117 can be done with:
+    ```python
+    ignore_warnings = (
+        "The number of channels in the channels.tsv sidecar file",
+        'contains a "stim_type" column. This column should be renamed to "trial_type"',
+        "Cannot set channel type for the following channels",
+        "Unable to map the following column",
+        "more than 20 mm from head frame origin",
+        "Did not find any (channels.tsv|meg.json) associated with sub-emptyroom_ses",
+    )
+    ```
+"""
 
 # %%
 # # Error handling
