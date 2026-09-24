@@ -84,7 +84,9 @@ for data_folder in orig_data.rglob("*/*/"):
     # final pilot
     EVENT_DICT |= EVENT_DICT_DEFAULT
     stim_start_events = [
-        val for key, val in EVENT_DICT.items() if key.endswith(("click", "imagine"))
+        val
+        for key, val in EVENT_DICT.items()
+        if key.endswith("stim_start") and not key.startswith("finale")
     ]
     bids_path.update(session=session)
     ermpaths = list()

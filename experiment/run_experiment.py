@@ -422,6 +422,14 @@ with ExperimentController(
                     do_pause(ec, (attn_press, attn_time))
                 since = ec.get_time()
                 ec.stop()
+                # NOTE ↑↑↑ there is no "stim_end" trigger stamped after this ec.stop().
+                # This is OK since we don't plan to analyze brain signal at offset of
+                # these attention-check events, and if we end up wanting to anyway we
+                # could figure out the offset from the experiment logs (we know which
+                # stim was played and its duration).
+                # Nonetheless, the lack of stim_end trigger must be accounted for during
+                # bidsification.
+
                 # True if pressed Y & it was real, or if pressed N & it was fake
                 correct_response = (attn_press.lower() == yes) != fake
                 if practice:
