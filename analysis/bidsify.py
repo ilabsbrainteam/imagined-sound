@@ -150,7 +150,7 @@ for data_folder in orig_data.rglob("*/*/"):
     if subj in prebads:
         mark_channels(
             bids_path=bids_path,
-            ch_names=prebads[subj][int(session)],
+            ch_names=prebads[subj][session],
             status="bad",
             descriptions="prebad",
         )
