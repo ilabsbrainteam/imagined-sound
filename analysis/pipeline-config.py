@@ -788,7 +788,7 @@ mf_mc_gof_limit: float = 0.95
 Minimum goodness of fit to accept for each cHPI coil.
 """
 
-# mf_mc_dist_limit: float = 0.005
+mf_mc_dist_limit: float = 0.006
 """
 Minimum distance (m) to accept for cHPI position fitting.
 """
