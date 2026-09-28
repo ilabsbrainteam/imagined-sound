@@ -870,7 +870,7 @@ lowpass filter. By default it's `'auto'` and uses default MNE
 parameters.
 """
 
-# notch_freq: float | Sequence[float] | None = None
+notch_freq: float | Sequence[float] | None = 60
 """
 Notch filter frequency. More than one frequency can be supplied, e.g. to remove
 harmonics. Keep it `None` if no notch filter should be applied.
@@ -899,13 +899,13 @@ Specifies the transition bandwidth of the notch filter. The default is `1.`.
 Specifies the width of each stop band. `None` uses the MNE default.
 """
 
-zapline_fline: float | None = 60
+# zapline_fline: float | None = 60
 """
 Specifies frequency to remove using Zapline filtering. If None, zapline will not
 be used.
 """
 
-zapline_iter: bool = True
+# zapline_iter: bool = True
 """
 Specifies if the iterative version of the Zapline algorithm should be run.
 """
