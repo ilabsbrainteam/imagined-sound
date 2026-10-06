@@ -24,7 +24,8 @@ for ev_file in event_files:
         root / "experiment-logs" / f"{subj}_{session}_trial_info.csv", index_col=0
     )
     # load the events data from the BIDS tree and assign trial numbers
-    # trial -1 is assigned to all events prior to the first stimulus
+    # trial 0 is assigned to all events prior to the first stimulus, so the first real
+    # trial is number 1
     df = pd.read_csv(ev_file, sep="\t")
     # assign trial numbers
     df["trial_num"] = pd.array(
@@ -34,8 +35,7 @@ for ev_file in event_files:
     # cleanup and write to disk
     df.reset_index(drop=True, inplace=True)
     df.to_csv(ev_file, sep="\t", index=False)
-
-    # minus 1 here because of "trial# -1" ↓↓↓ (button presses preceding first trial)
+    # minus 1 here because of "trial# 0" ↓↓↓ (button presses preceding first trial)
     assert df["trial_num"].unique().size - 1 == trial_data.shape[0], (
         f"mismatched number of trials {df['trial_num'].unique().size - 1} vs TAB {trial_data.shape[0]}"
     )
@@ -47,17 +47,25 @@ for ev_file in event_files:
         sub_df = df.loc[df["trial_num"] == row["trial_num"]]
         # get block identity
         block = trial_data.iloc[row["trial_num"] - 1]["block"]
+        if block == "finale":
+            continue
         # for "click" blocks we end epoch at START of response period
         if block.startswith("click"):
             end_row = sub_df.loc[sub_df["trial_type"].str.endswith("resp_start")]
         # for "imagine" blocks we end epoch when they first click
         else:
-            end_row = sub_df.loc[sub_df["trial_type"].str.startswith("button")]
+            in_resp_period = False
+            for _ix, _row in sub_df.iterrows():
+                if _row["trial_type"] == "resp_start":
+                    in_resp_period = True
+                if in_resp_period and _row["trial_type"].startswith("button"):
+                    end_row = sub_df.loc[[_ix]]  # so it's a 1-row dataframe
         if not len(end_row):
-            continue
-        start = row["sample"]
-        end = end_row.iloc[0]["sample"]
-        epoch_durs[subj][block].append(end - start)
+            print(f"sub-{subj}: trial {row['trial_num']} ({block}) no end row found")
+        else:
+            start = row["sample"]
+            end = end_row.iloc[0]["sample"]
+            epoch_durs[subj][block].append(end - start)
     # convert to array
     for block in epoch_durs[subj]:
         epoch_durs[subj][block] = np.array(epoch_durs[subj][block])
