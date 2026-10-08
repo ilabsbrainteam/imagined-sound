@@ -936,7 +936,7 @@ https://mne.tools/stable/generated/mne.filter.filter_data
 # resample your data down to 500 Hz without preventing reliable time-frequency
 # exploration of your data.
 
-# raw_resample_sfreq: float | None = None
+raw_resample_sfreq: float | None = 250
 """
 Specifies at which sampling frequency the data should be resampled.
 If `None`, then no resampling will be done.
