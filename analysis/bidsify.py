@@ -6,6 +6,7 @@ from warnings import filterwarnings
 
 import mne
 import numpy as np
+import pandas as pd
 import yaml
 from mne_bids import (
     BIDSPath,
@@ -74,12 +75,29 @@ task_dict = dict(
     musicimagine="MusicImagine",
 )
 
+
+def needs_recompute(input_paths, output_paths, expected_prebads, channels_tsv):
+    """Decide whether BIDSification is needed, and say why (or why not)."""
+    missing = [p for p in output_paths if not p.exists()]
+    if missing:
+        return f"missing output {missing[0].name}"
+    newest_input = max(p.stat().st_mtime for p in input_paths)
+    oldest_output = min(p.stat().st_mtime for p in output_paths)
+    if newest_input > oldest_output:
+        return "input data newer than BIDS output"
+    # bad channels: compare what's marked "prebad" in channels.tsv to the YAML
+    chs = pd.read_csv(channels_tsv, sep="\t")
+    marked = set(chs.loc[chs["status_description"] == "prebad", "name"])
+    if marked != set(expected_prebads):
+        return f"prebads changed ({sorted(marked)} → {sorted(expected_prebads)})"
+    return None
+
+
 for data_folder in orig_data.rglob("*/*/"):
     _dirpath = data_folder.relative_to(orig_data)
     if not data_folder_pattern.match(str(_dirpath)):
         print(f"skipping folder {_dirpath}")
         continue
-    print(f"processing folder {_dirpath}")
     session = _dirpath.parts[-1]
     # final pilot
     EVENT_DICT |= EVENT_DICT_DEFAULT
@@ -111,6 +129,25 @@ for data_folder in orig_data.rglob("*/*/"):
     ermpath = ermpaths[0]
     rawpath = rawpaths[0]
     tabpath = tabpaths[0]
+    # skip if BIDS outputs are newer than all inputs & prebads haven't changed
+    trial_info_fname = trial_info / f"{subj}_{session}_trial_info.csv"
+    this_prebads = prebads.get(subj, dict()).get(session, [])
+    input_paths = [p for p in data_folder.iterdir() if p.is_file()]
+    t1_fname = mri_dir / subj / "mri" / "T1.mgz"
+    if t1_fname.exists():
+        input_paths.append(t1_fname)
+    channels_tsv = bids_path.copy().update(suffix="channels", extension=".tsv").fpath
+    output_paths = [channels_tsv, trial_info_fname]
+    reason = needs_recompute(
+        input_paths=input_paths,
+        output_paths=output_paths,
+        expected_prebads=this_prebads,
+        channels_tsv=channels_tsv,
+    )
+    if reason is None:
+        print(f"skipping folder {_dirpath}: BIDS data already up to date")
+        continue
+    print(f"processing folder {_dirpath}: {reason}")
     raws = list()
     dfs = list()
     evs = list()
@@ -149,16 +186,15 @@ for data_folder in orig_data.rglob("*/*/"):
         allow_preload=True,
     )
     # mark bads
-    if subj in prebads:
+    if len(this_prebads):
         mark_channels(
             bids_path=bids_path,
-            ch_names=prebads[subj][session],
+            ch_names=this_prebads,
             status="bad",
             descriptions="prebad",
         )
     # use MNE-BIDS to (re)write the T1, so we can get the side
     # effect of converting the trans file to a JSON sidecar
-    t1_fname = mri_dir / subj / "mri" / "T1.mgz"
     if t1_fname.exists():
         trans = mne.read_trans(rawpath.parent / f"prism_{subj}_01-trans.fif")
         landmarks = get_anat_landmarks(
@@ -184,7 +220,7 @@ for data_folder in orig_data.rglob("*/*/"):
         print(
             f"BADNESS: N events {mask.sum()} doesn't match N trials from TAB {non_finale_trials.shape[0]}"
         )
-    df.to_csv(trial_info / f"{subj}_{session}_trial_info.csv")
+    df.to_csv(trial_info_fname)
 
 # expect:
 # 5+94 click-speech
