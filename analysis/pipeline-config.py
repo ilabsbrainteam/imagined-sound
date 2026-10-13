@@ -1150,11 +1150,9 @@ with open(root / "metadata" / "derived-epoch-durs.yaml") as fid:
     _durs = safe_load(fid)
 
 # `derived-epoch-durs.yaml` holds, per subject and block, the longest trial duration
-# (stim_start -> resp_end, in samples at 1000 Hz; see precompute_epoch_length.py). Use
-# the longest across all subjects & blocks so that every epoch spans the whole trial.
-epo_durs = [val for key, dct in _durs.items() for val in dct.values()]
-
-epochs_tmax: float = max(epo_durs) / 1000.0
+# (stim_start -> resp_end, in seconds; see precompute_epoch_length.py). Use the longest
+# across all subjects & blocks so that every epoch spans the whole trial.
+epochs_tmax: float = max(max(blocks.values()) for blocks in _durs.values())
 """
 The end of an epoch, relative to the respective event, in seconds.
 ???+ example "Example"

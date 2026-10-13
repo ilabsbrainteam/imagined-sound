@@ -161,8 +161,8 @@ if visualize:
 for subj, blocks in epoch_durs.items():
     final_epoch_durs[subj] = dict()
     for block, durs in blocks.items():
-        # longest trial (in samples) for this subject & block
-        final_epoch_durs[subj][block] = int(durs.max())
+        # longest trial (in seconds) for this subject & block
+        final_epoch_durs[subj][block] = float(durs.max() / sfreqs[subj])
 
 with open(metadata / "derived-epoch-durs.yaml", "w") as fid:
     safe_dump(final_epoch_durs, fid)
