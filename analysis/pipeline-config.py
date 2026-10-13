@@ -1359,7 +1359,11 @@ the same channel for each session within a subject) or `"sub-X_ses-Y"` (to use p
 different channels for each session of a given subject).
 """
 
-ica_reject: dict[str, float] | Literal["autoreject_local"] | None = "autoreject_local"
+ica_reject: dict[str, float] | Literal["autoreject_local"] | None = dict(
+    grad=4000e-13,  # 4000 fT/cm
+    mag=4000e-15,  # 4000 fT
+    eog=150e-6,  # 150 µV
+)
 """
 Peak-to-peak amplitude limits to exclude epochs from ICA fitting. This allows you to
 remove strong transient artifacts from the epochs used for fitting ICA, which could
@@ -1504,7 +1508,11 @@ false-alarm rate increases dramatically.
 #     like.
 
 reject: dict[str, float] | Literal["autoreject_global", "autoreject_local"] | None = (
-    "autoreject_local"
+    dict(
+        grad=3000e-13,  # 3000 fT/cm
+        mag=3000e-15,  # 3000 fT
+        eog=150e-6,  # 150 µV
+    )
 )
 """
 Peak-to-peak amplitude limits to mark epochs as bad. This allows you to remove
