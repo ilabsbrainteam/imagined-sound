@@ -968,7 +968,12 @@ can be used for resampling raw data. `1` means no decimation.
 
 # ## Epoching
 
-# rename_events: dict[str, str] = dict()
+rename_events: dict[str, str] = dict(
+    button_1="button/b1",
+    button_2="button/b2",
+    button_3="button/b3",
+    button_4="button/b4",
+)
 """
 A dictionary specifying which events in the BIDS dataset to rename upon
 loading, and before processing begins.
@@ -983,7 +988,7 @@ Pass an empty dictionary to not perform any renaming.
     ```
 """
 
-# on_rename_missing_events: Literal["ignore", "warn", "raise"] = "raise"
+on_rename_missing_events: Literal["ignore", "warn", "raise"] = "ignore"
 """
 How to handle the situation where you specified an event to be renamed via
 `rename_events`, but this particular event is not present in the data. By
@@ -1026,7 +1031,7 @@ If None, don't use custom metadata.
 """
 
 
-# epochs_metadata_tmin: float | str | list[str] | None = None
+epochs_metadata_tmin: float | str | list[str] | None = ["resp_start"]
 """
 The beginning of the time window used for epochs metadata generation. This setting
 controls the `tmin` value passed to
@@ -1048,13 +1053,13 @@ If `None`, use the first time point of the epoch.
 
 """
 
-# epochs_metadata_tmax: float | str | list[str] | None = None
+epochs_metadata_tmax: float | str | list[str] | None = ["resp_end"]
 """
 Same as `epochs_metadata_tmin`, but specifying the **end** of the time
 window for metadata generation.
 """
 
-# epochs_metadata_keep_first: Sequence[str] | None = None
+epochs_metadata_keep_first: Sequence[str] | None = ["button"]
 """
 Event groupings using hierarchical event descriptors (HEDs) for which to store
 the time of the **first** occurrence of any event of this group in a new column
