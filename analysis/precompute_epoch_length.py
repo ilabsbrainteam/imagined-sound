@@ -13,7 +13,7 @@ bids_root = root / "bids-data"
 metadata = root / "metadata"
 figdir = Path(__file__).resolve().parent / "figures"
 
-visualize = False  # set to False to skip the trial-duration visualization
+visualize = True  # set to False to skip the trial-duration visualization
 
 event_files = find_matching_paths(root=bids_root, suffixes="events", extensions=".tsv")
 
